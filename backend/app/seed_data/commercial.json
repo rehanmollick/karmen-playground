@@ -1,0 +1,96 @@
+{
+  "id": "commercial",
+  "name": "Summit Office — Commercial Tenant Improvement",
+  "description": "15,000 SF office tenant improvement on floors 3-4 of a Class-A office tower. Open office, 8 private offices, 2 conference rooms, café/break room, and server room.",
+  "project_type": "commercial",
+  "start_date": "2026-03-01",
+  "wbs": [
+    {
+      "id": "1", "name": "Pre-Construction", "parent_id": null, "children": [
+        {"id": "1.1", "name": "Permits & Procurement", "parent_id": "1", "children": [], "activities": ["B1010", "B1020", "B1030", "B1040"]}
+      ], "activities": []
+    },
+    {
+      "id": "2", "name": "Demolition", "parent_id": null, "children": [
+        {"id": "2.1", "name": "Demo & Abatement", "parent_id": "2", "children": [], "activities": ["B2010", "B2020", "B2030"]}
+      ], "activities": []
+    },
+    {
+      "id": "3", "name": "Structural Modifications", "parent_id": null, "children": [
+        {"id": "3.1", "name": "Structural Work", "parent_id": "3", "children": [], "activities": ["B3010", "B3020"]}
+      ], "activities": []
+    },
+    {
+      "id": "4", "name": "MEP Rough-In", "parent_id": null, "children": [
+        {"id": "4.1", "name": "Mechanical / Electrical / Plumbing", "parent_id": "4", "children": [], "activities": ["B4010", "B4020", "B4030", "B4040", "B4050"]}
+      ], "activities": []
+    },
+    {
+      "id": "5", "name": "Framing & Drywall", "parent_id": null, "children": [
+        {"id": "5.1", "name": "Interior Partitions", "parent_id": "5", "children": [], "activities": ["B5010", "B5020", "B5030", "B5040"]}
+      ], "activities": []
+    },
+    {
+      "id": "6", "name": "Ceilings", "parent_id": null, "children": [
+        {"id": "6.1", "name": "Ceiling Systems", "parent_id": "6", "children": [], "activities": ["B6010", "B6020"]}
+      ], "activities": []
+    },
+    {
+      "id": "7", "name": "Flooring", "parent_id": null, "children": [
+        {"id": "7.1", "name": "Floor Finishes", "parent_id": "7", "children": [], "activities": ["B7010", "B7020", "B7030"]}
+      ], "activities": []
+    },
+    {
+      "id": "8", "name": "Millwork & Specialties", "parent_id": null, "children": [
+        {"id": "8.1", "name": "Casework & Specialties", "parent_id": "8", "children": [], "activities": ["B8010", "B8020", "B8030"]}
+      ], "activities": []
+    },
+    {
+      "id": "9", "name": "MEP Trim", "parent_id": null, "children": [
+        {"id": "9.1", "name": "MEP Completion", "parent_id": "9", "children": [], "activities": ["B9010", "B9020", "B9030", "B9040"]}
+      ], "activities": []
+    },
+    {
+      "id": "10", "name": "Commissioning & Closeout", "parent_id": null, "children": [
+        {"id": "10.1", "name": "Testing & Turnover", "parent_id": "10", "children": [], "activities": ["B10010", "B10020", "B10030", "B10040", "B10050"]}
+      ], "activities": []
+    }
+  ],
+  "activities": [
+    {"id": "B1010", "name": "Notice to Proceed", "wbs_id": "1.1", "duration_days": 1, "predecessors": [], "resource": "Owner", "is_milestone": true},
+    {"id": "B1020", "name": "Building Permit Application", "wbs_id": "1.1", "duration_days": 14, "predecessors": [{"predecessor_id": "B1010", "type": "FS", "lag_days": 0}], "resource": "Architect", "is_milestone": false},
+    {"id": "B1030", "name": "Long-Lead Equipment Procurement", "wbs_id": "1.1", "duration_days": 21, "predecessors": [{"predecessor_id": "B1010", "type": "FS", "lag_days": 0}], "resource": "Project Manager", "is_milestone": false},
+    {"id": "B1040", "name": "Permits Approved", "wbs_id": "1.1", "duration_days": 1, "predecessors": [{"predecessor_id": "B1020", "type": "FS", "lag_days": 0}], "resource": "Building Dept", "is_milestone": true},
+    {"id": "B2010", "name": "Hazmat Survey & Abatement", "wbs_id": "2.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B1040", "type": "FS", "lag_days": 0}], "resource": "Abatement Contractor", "is_milestone": false},
+    {"id": "B2020", "name": "Selective Demolition — Partitions", "wbs_id": "2.1", "duration_days": 8, "predecessors": [{"predecessor_id": "B2010", "type": "FS", "lag_days": 0}], "resource": "Demo Contractor", "is_milestone": false},
+    {"id": "B2030", "name": "Existing MEP Demolition & Cap-Off", "wbs_id": "2.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B2020", "type": "SS", "lag_days": 3}], "resource": "MEP Contractor", "is_milestone": false},
+    {"id": "B3010", "name": "New Door Openings — Structural", "wbs_id": "3.1", "duration_days": 7, "predecessors": [{"predecessor_id": "B2020", "type": "FS", "lag_days": 0}], "resource": "Structural Contractor", "is_milestone": false},
+    {"id": "B3020", "name": "Slab Core Drilling for MEP", "wbs_id": "3.1", "duration_days": 4, "predecessors": [{"predecessor_id": "B3010", "type": "SS", "lag_days": 2}], "resource": "Core Drilling Contractor", "is_milestone": false},
+    {"id": "B4010", "name": "Electrical Panel Upgrade & Feeders", "wbs_id": "4.1", "duration_days": 10, "predecessors": [{"predecessor_id": "B2030", "type": "FS", "lag_days": 0}], "resource": "Electrical Contractor", "is_milestone": false},
+    {"id": "B4020", "name": "Plumbing Rough-In & Reroute", "wbs_id": "4.1", "duration_days": 8, "predecessors": [{"predecessor_id": "B3020", "type": "FS", "lag_days": 0}], "resource": "Plumbing Contractor", "is_milestone": false},
+    {"id": "B4030", "name": "HVAC VAV Boxes & Ductwork", "wbs_id": "4.1", "duration_days": 12, "predecessors": [{"predecessor_id": "B2030", "type": "FS", "lag_days": 0}], "resource": "HVAC Contractor", "is_milestone": false},
+    {"id": "B4040", "name": "Fire Sprinkler Rough-In", "wbs_id": "4.1", "duration_days": 8, "predecessors": [{"predecessor_id": "B4030", "type": "SS", "lag_days": 3}], "resource": "Fire Protection Contractor", "is_milestone": false},
+    {"id": "B4050", "name": "Low Voltage Rough-In (Data/AV/Security)", "wbs_id": "4.1", "duration_days": 10, "predecessors": [{"predecessor_id": "B4010", "type": "SS", "lag_days": 2}], "resource": "Low Voltage Contractor", "is_milestone": false},
+    {"id": "B5010", "name": "Metal Stud Framing", "wbs_id": "5.1", "duration_days": 10, "predecessors": [{"predecessor_id": "B4010", "type": "FS", "lag_days": 0}], "resource": "Framing Contractor", "is_milestone": false},
+    {"id": "B5020", "name": "Insulation — Batt & Acoustic", "wbs_id": "5.1", "duration_days": 4, "predecessors": [{"predecessor_id": "B5010", "type": "FS", "lag_days": 0}], "resource": "Insulation Contractor", "is_milestone": false},
+    {"id": "B5030", "name": "Drywall Hang", "wbs_id": "5.1", "duration_days": 10, "predecessors": [{"predecessor_id": "B5020", "type": "FS", "lag_days": 0}, {"predecessor_id": "B4030", "type": "FS", "lag_days": 0}, {"predecessor_id": "B4040", "type": "FS", "lag_days": 0}], "resource": "Drywall Contractor", "is_milestone": false},
+    {"id": "B5040", "name": "Drywall Tape, Mud & Finish", "wbs_id": "5.1", "duration_days": 8, "predecessors": [{"predecessor_id": "B5030", "type": "FS", "lag_days": 0}], "resource": "Drywall Contractor", "is_milestone": false},
+    {"id": "B6010", "name": "Acoustic Ceiling Grid Layout", "wbs_id": "6.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B5040", "type": "FS", "lag_days": 0}], "resource": "Ceiling Contractor", "is_milestone": false},
+    {"id": "B6020", "name": "Ceiling Tile Install", "wbs_id": "6.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B6010", "type": "FS", "lag_days": 0}], "resource": "Ceiling Contractor", "is_milestone": false},
+    {"id": "B7010", "name": "Floor Prep & Leveling", "wbs_id": "7.1", "duration_days": 4, "predecessors": [{"predecessor_id": "B5040", "type": "FS", "lag_days": 0}], "resource": "Flooring Contractor", "is_milestone": false},
+    {"id": "B7020", "name": "Carpet & LVT Installation", "wbs_id": "7.1", "duration_days": 6, "predecessors": [{"predecessor_id": "B7010", "type": "FS", "lag_days": 0}], "resource": "Flooring Contractor", "is_milestone": false},
+    {"id": "B7030", "name": "Polished Concrete — Server Room", "wbs_id": "7.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B7010", "type": "FS", "lag_days": 0}], "resource": "Concrete Polisher", "is_milestone": false},
+    {"id": "B8010", "name": "Reception Desk & Built-In Millwork", "wbs_id": "8.1", "duration_days": 7, "predecessors": [{"predecessor_id": "B7020", "type": "SS", "lag_days": 2}], "resource": "Millwork Installer", "is_milestone": false},
+    {"id": "B8020", "name": "Signage & Wayfinding", "wbs_id": "8.1", "duration_days": 3, "predecessors": [{"predecessor_id": "B8010", "type": "FS", "lag_days": 0}], "resource": "Signage Contractor", "is_milestone": false},
+    {"id": "B8030", "name": "Interior Paint — All Areas", "wbs_id": "8.1", "duration_days": 8, "predecessors": [{"predecessor_id": "B5040", "type": "FS", "lag_days": 0}], "resource": "Painting Contractor", "is_milestone": false},
+    {"id": "B9010", "name": "Electrical Trim — Devices, Panels, Fixtures", "wbs_id": "9.1", "duration_days": 6, "predecessors": [{"predecessor_id": "B6020", "type": "FS", "lag_days": 0}, {"predecessor_id": "B8030", "type": "FS", "lag_days": 0}], "resource": "Electrical Contractor", "is_milestone": false},
+    {"id": "B9020", "name": "Plumbing Trim — Fixtures & Connections", "wbs_id": "9.1", "duration_days": 4, "predecessors": [{"predecessor_id": "B8030", "type": "FS", "lag_days": 0}], "resource": "Plumbing Contractor", "is_milestone": false},
+    {"id": "B9030", "name": "HVAC Trim — Diffusers & Thermostats", "wbs_id": "9.1", "duration_days": 4, "predecessors": [{"predecessor_id": "B6020", "type": "FS", "lag_days": 0}], "resource": "HVAC Contractor", "is_milestone": false},
+    {"id": "B9040", "name": "Low Voltage Trim — Data Drops & AV", "wbs_id": "9.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B9010", "type": "SS", "lag_days": 1}], "resource": "Low Voltage Contractor", "is_milestone": false},
+    {"id": "B10010", "name": "TAB — Testing, Adjusting & Balancing", "wbs_id": "10.1", "duration_days": 4, "predecessors": [{"predecessor_id": "B9030", "type": "FS", "lag_days": 0}], "resource": "TAB Contractor", "is_milestone": false},
+    {"id": "B10020", "name": "Fire Alarm & Life Safety Test", "wbs_id": "10.1", "duration_days": 2, "predecessors": [{"predecessor_id": "B9010", "type": "FS", "lag_days": 0}], "resource": "Fire Alarm Contractor", "is_milestone": false},
+    {"id": "B10030", "name": "Punch List & Owner Walkthrough", "wbs_id": "10.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B10010", "type": "FS", "lag_days": 0}, {"predecessor_id": "B10020", "type": "FS", "lag_days": 0}, {"predecessor_id": "B8020", "type": "FS", "lag_days": 0}, {"predecessor_id": "B9040", "type": "FS", "lag_days": 0}], "resource": "General Contractor", "is_milestone": false},
+    {"id": "B10040", "name": "Final Inspections & CO", "wbs_id": "10.1", "duration_days": 3, "predecessors": [{"predecessor_id": "B10030", "type": "FS", "lag_days": 0}], "resource": "Building Dept", "is_milestone": false},
+    {"id": "B10050", "name": "Tenant Occupancy", "wbs_id": "10.1", "duration_days": 1, "predecessors": [{"predecessor_id": "B10040", "type": "FS", "lag_days": 0}], "resource": "Owner", "is_milestone": true}
+  ]
+}

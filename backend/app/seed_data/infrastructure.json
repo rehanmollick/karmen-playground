@@ -1,0 +1,100 @@
+{
+  "id": "infrastructure",
+  "name": "Cedar Creek Bridge — Highway Bridge Replacement",
+  "description": "Full replacement of a 4-span, 280-foot highway bridge over Cedar Creek on State Route 14. Includes traffic control, temporary detour bridge, drilled shaft foundations, prestressed concrete girders, and approach work.",
+  "project_type": "infrastructure",
+  "start_date": "2026-05-01",
+  "wbs": [
+    {
+      "id": "1", "name": "Mobilization", "parent_id": null, "children": [
+        {"id": "1.1", "name": "Project Setup & Traffic Control", "parent_id": "1", "children": [], "activities": ["C1010", "C1020", "C1030", "C1040"]}
+      ], "activities": []
+    },
+    {
+      "id": "2", "name": "Demolition", "parent_id": null, "children": [
+        {"id": "2.1", "name": "Existing Bridge Removal", "parent_id": "2", "children": [], "activities": ["C2010", "C2020", "C2030"]}
+      ], "activities": []
+    },
+    {
+      "id": "3", "name": "Foundation", "parent_id": null, "children": [
+        {"id": "3.1", "name": "Deep Foundation", "parent_id": "3", "children": [], "activities": ["C3010", "C3020", "C3030", "C3040", "C3050"]}
+      ], "activities": []
+    },
+    {
+      "id": "4", "name": "Substructure", "parent_id": null, "children": [
+        {"id": "4.1", "name": "Abutments & Piers", "parent_id": "4", "children": [], "activities": ["C4010", "C4020", "C4030", "C4040", "C4050"]}
+      ], "activities": []
+    },
+    {
+      "id": "5", "name": "Superstructure", "parent_id": null, "children": [
+        {"id": "5.1", "name": "Girder & Framing", "parent_id": "5", "children": [], "activities": ["C5010", "C5020", "C5030", "C5040"]}
+      ], "activities": []
+    },
+    {
+      "id": "6", "name": "Bridge Deck", "parent_id": null, "children": [
+        {"id": "6.1", "name": "Deck Construction", "parent_id": "6", "children": [], "activities": ["C6010", "C6020", "C6030", "C6040"]}
+      ], "activities": []
+    },
+    {
+      "id": "7", "name": "Barriers & Rails", "parent_id": null, "children": [
+        {"id": "7.1", "name": "Bridge Appurtenances", "parent_id": "7", "children": [], "activities": ["C7010", "C7020", "C7030"]}
+      ], "activities": []
+    },
+    {
+      "id": "8", "name": "Approach Work", "parent_id": null, "children": [
+        {"id": "8.1", "name": "Roadway & Approaches", "parent_id": "8", "children": [], "activities": ["C8010", "C8020", "C8030", "C8040"]}
+      ], "activities": []
+    },
+    {
+      "id": "9", "name": "Utilities & Drainage", "parent_id": null, "children": [
+        {"id": "9.1", "name": "Utility Installation", "parent_id": "9", "children": [], "activities": ["C9010", "C9020", "C9030"]}
+      ], "activities": []
+    },
+    {
+      "id": "10", "name": "Finishing & Closeout", "parent_id": null, "children": [
+        {"id": "10.1", "name": "Final Completion", "parent_id": "10", "children": [], "activities": ["C10010", "C10020", "C10030", "C10040"]}
+      ], "activities": []
+    }
+  ],
+  "activities": [
+    {"id": "C1010", "name": "Contractor Mobilization", "wbs_id": "1.1", "duration_days": 10, "predecessors": [], "resource": "General Contractor", "is_milestone": false},
+    {"id": "C1020", "name": "Traffic Control Plan Implementation", "wbs_id": "1.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C1010", "type": "FS", "lag_days": 0}], "resource": "Traffic Control Contractor", "is_milestone": false},
+    {"id": "C1030", "name": "Temporary Detour Road Construction", "wbs_id": "1.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C1020", "type": "FS", "lag_days": 0}], "resource": "Roadway Contractor", "is_milestone": false},
+    {"id": "C1040", "name": "Erosion & Sediment Control Install", "wbs_id": "1.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C1010", "type": "FS", "lag_days": 0}], "resource": "Environmental Contractor", "is_milestone": false},
+    {"id": "C2010", "name": "Bridge Deck Removal — Existing", "wbs_id": "2.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C1030", "type": "FS", "lag_days": 0}], "resource": "Demo Contractor", "is_milestone": false},
+    {"id": "C2020", "name": "Superstructure Removal — Girders", "wbs_id": "2.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C2010", "type": "FS", "lag_days": 0}], "resource": "Demo Contractor", "is_milestone": false},
+    {"id": "C2030", "name": "Substructure Demo — Piers & Abutments", "wbs_id": "2.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C2020", "type": "FS", "lag_days": 0}], "resource": "Demo Contractor", "is_milestone": false},
+    {"id": "C3010", "name": "Drilled Shaft Mobilization & Setup", "wbs_id": "3.1", "duration_days": 5, "predecessors": [{"predecessor_id": "C2030", "type": "FS", "lag_days": 0}], "resource": "Drilled Shaft Contractor", "is_milestone": false},
+    {"id": "C3020", "name": "Drilled Shafts — Abutment A", "wbs_id": "3.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C3010", "type": "FS", "lag_days": 0}], "resource": "Drilled Shaft Contractor", "is_milestone": false},
+    {"id": "C3030", "name": "Drilled Shafts — Pier 1 & Pier 2", "wbs_id": "3.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C3010", "type": "FS", "lag_days": 0}], "resource": "Drilled Shaft Contractor", "is_milestone": false},
+    {"id": "C3040", "name": "Drilled Shafts — Abutment B", "wbs_id": "3.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C3010", "type": "FS", "lag_days": 7}], "resource": "Drilled Shaft Contractor", "is_milestone": false},
+    {"id": "C3050", "name": "Pile Caps — All Foundations", "wbs_id": "3.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C3020", "type": "FS", "lag_days": 0}, {"predecessor_id": "C3030", "type": "FS", "lag_days": 0}, {"predecessor_id": "C3040", "type": "FS", "lag_days": 0}], "resource": "Foundation Contractor", "is_milestone": false},
+    {"id": "C4010", "name": "Abutment A — Formwork, Rebar & Pour", "wbs_id": "4.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C3050", "type": "FS", "lag_days": 0}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C4020", "name": "Pier 1 Column & Cap", "wbs_id": "4.1", "duration_days": 18, "predecessors": [{"predecessor_id": "C3050", "type": "FS", "lag_days": 0}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C4030", "name": "Pier 2 Column & Cap", "wbs_id": "4.1", "duration_days": 18, "predecessors": [{"predecessor_id": "C4020", "type": "SS", "lag_days": 5}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C4040", "name": "Abutment B — Formwork, Rebar & Pour", "wbs_id": "4.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C3050", "type": "FS", "lag_days": 0}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C4050", "name": "Bearing Pads Installation", "wbs_id": "4.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C4010", "type": "FS", "lag_days": 0}, {"predecessor_id": "C4020", "type": "FS", "lag_days": 0}, {"predecessor_id": "C4030", "type": "FS", "lag_days": 0}, {"predecessor_id": "C4040", "type": "FS", "lag_days": 0}], "resource": "Bearing Pad Installer", "is_milestone": false},
+    {"id": "C5010", "name": "Prestressed Girder Fabrication", "wbs_id": "5.1", "duration_days": 45, "predecessors": [{"predecessor_id": "C3050", "type": "FS", "lag_days": 0}], "resource": "Precast Plant", "is_milestone": false},
+    {"id": "C5020", "name": "Girder Erection — Spans 1 & 2", "wbs_id": "5.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C5010", "type": "FS", "lag_days": 0}, {"predecessor_id": "C4050", "type": "FS", "lag_days": 0}], "resource": "Erection Contractor", "is_milestone": false},
+    {"id": "C5030", "name": "Girder Erection — Spans 3 & 4", "wbs_id": "5.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C5020", "type": "FS", "lag_days": 0}], "resource": "Erection Contractor", "is_milestone": false},
+    {"id": "C5040", "name": "Diaphragms & Cross-Frames", "wbs_id": "5.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C5030", "type": "FS", "lag_days": 0}], "resource": "Structural Steel Contractor", "is_milestone": false},
+    {"id": "C6010", "name": "Deck Formwork & Stay-in-Place Forms", "wbs_id": "6.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C5040", "type": "FS", "lag_days": 0}], "resource": "Formwork Contractor", "is_milestone": false},
+    {"id": "C6020", "name": "Deck Reinforcement Mat", "wbs_id": "6.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C6010", "type": "SS", "lag_days": 5}], "resource": "Rebar Contractor", "is_milestone": false},
+    {"id": "C6030", "name": "Bridge Deck Concrete Pour", "wbs_id": "6.1", "duration_days": 5, "predecessors": [{"predecessor_id": "C6020", "type": "FS", "lag_days": 0}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C6040", "name": "Deck Cure & Post-Tension Stressing", "wbs_id": "6.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C6030", "type": "FS", "lag_days": 0}], "resource": "Post-Tension Contractor", "is_milestone": false},
+    {"id": "C7010", "name": "Concrete Barrier Wall — Both Sides", "wbs_id": "7.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C6040", "type": "FS", "lag_days": 0}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C7020", "name": "Bridge Railing Installation", "wbs_id": "7.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C7010", "type": "FS", "lag_days": 0}], "resource": "Railing Contractor", "is_milestone": false},
+    {"id": "C7030", "name": "Expansion Joints & Waterproofing", "wbs_id": "7.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C7010", "type": "FS", "lag_days": 0}], "resource": "Specialty Contractor", "is_milestone": false},
+    {"id": "C8010", "name": "Approach Slab — Both Ends", "wbs_id": "8.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C4010", "type": "FS", "lag_days": 0}, {"predecessor_id": "C4040", "type": "FS", "lag_days": 0}], "resource": "Concrete Contractor", "is_milestone": false},
+    {"id": "C8020", "name": "Roadway Embankment & Grading", "wbs_id": "8.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C8010", "type": "FS", "lag_days": 0}], "resource": "Earthwork Contractor", "is_milestone": false},
+    {"id": "C8030", "name": "Base Course & Subbase Paving", "wbs_id": "8.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C8020", "type": "FS", "lag_days": 0}], "resource": "Paving Contractor", "is_milestone": false},
+    {"id": "C8040", "name": "Asphalt Paving — Final Course", "wbs_id": "8.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C8030", "type": "FS", "lag_days": 0}, {"predecessor_id": "C7020", "type": "FS", "lag_days": 0}], "resource": "Paving Contractor", "is_milestone": false},
+    {"id": "C9010", "name": "Storm Drainage — Inlets & Pipes", "wbs_id": "9.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C8020", "type": "SS", "lag_days": 5}], "resource": "Drainage Contractor", "is_milestone": false},
+    {"id": "C9020", "name": "Bridge Deck Drainage System", "wbs_id": "9.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C7030", "type": "FS", "lag_days": 0}], "resource": "Drainage Contractor", "is_milestone": false},
+    {"id": "C9030", "name": "Conduit & Bridge Lighting", "wbs_id": "9.1", "duration_days": 14, "predecessors": [{"predecessor_id": "C7020", "type": "SS", "lag_days": 3}], "resource": "Electrical Contractor", "is_milestone": false},
+    {"id": "C10010", "name": "Pavement Striping & Markings", "wbs_id": "10.1", "duration_days": 5, "predecessors": [{"predecessor_id": "C8040", "type": "FS", "lag_days": 0}], "resource": "Striping Contractor", "is_milestone": false},
+    {"id": "C10020", "name": "Signage Installation", "wbs_id": "10.1", "duration_days": 5, "predecessors": [{"predecessor_id": "C10010", "type": "SS", "lag_days": 2}], "resource": "Signage Contractor", "is_milestone": false},
+    {"id": "C10030", "name": "Temporary Detour Removal & Site Cleanup", "wbs_id": "10.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C8040", "type": "FS", "lag_days": 0}, {"predecessor_id": "C9030", "type": "FS", "lag_days": 0}], "resource": "General Contractor", "is_milestone": false},
+    {"id": "C10040", "name": "Bridge Open to Traffic", "wbs_id": "10.1", "duration_days": 1, "predecessors": [{"predecessor_id": "C10010", "type": "FS", "lag_days": 0}, {"predecessor_id": "C10020", "type": "FS", "lag_days": 0}, {"predecessor_id": "C10030", "type": "FS", "lag_days": 0}], "resource": "DOT Inspector", "is_milestone": true}
+  ]
+}
