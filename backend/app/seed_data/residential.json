@@ -1,0 +1,100 @@
+{
+  "id": "residential",
+  "name": "Lakewood Residence — 3-Story Custom Home",
+  "description": "3-story custom residential build on a 0.5-acre lot. Includes full basement, attached 2-car garage, and custom millwork throughout. 4,800 SF livable area.",
+  "project_type": "residential",
+  "start_date": "2026-04-01",
+  "wbs": [
+    {
+      "id": "1", "name": "General Conditions", "parent_id": null, "children": [
+        {"id": "1.1", "name": "Mobilization & Setup", "parent_id": "1", "children": [], "activities": ["A1010", "A1020", "A1030"]}
+      ], "activities": []
+    },
+    {
+      "id": "2", "name": "Sitework", "parent_id": null, "children": [
+        {"id": "2.1", "name": "Site Preparation", "parent_id": "2", "children": [], "activities": ["A2010", "A2020", "A2030"]}
+      ], "activities": []
+    },
+    {
+      "id": "3", "name": "Foundation", "parent_id": null, "children": [
+        {"id": "3.1", "name": "Concrete Foundation", "parent_id": "3", "children": [], "activities": ["A3010", "A3020", "A3030", "A3040", "A3050", "A3060"]}
+      ], "activities": []
+    },
+    {
+      "id": "4", "name": "Structure", "parent_id": null, "children": [
+        {"id": "4.1", "name": "Structural Framing", "parent_id": "4", "children": [], "activities": ["A4010", "A4020", "A4030", "A4040", "A4050"]}
+      ], "activities": []
+    },
+    {
+      "id": "5", "name": "Building Envelope", "parent_id": null, "children": [
+        {"id": "5.1", "name": "Exterior Enclosure", "parent_id": "5", "children": [], "activities": ["A5010", "A5020", "A5030", "A5040"]}
+      ], "activities": []
+    },
+    {
+      "id": "6", "name": "MEP Rough-In", "parent_id": null, "children": [
+        {"id": "6.1", "name": "Mechanical / Electrical / Plumbing", "parent_id": "6", "children": [], "activities": ["A6010", "A6020", "A6030"]}
+      ], "activities": []
+    },
+    {
+      "id": "7", "name": "Interior Finishes", "parent_id": null, "children": [
+        {"id": "7.1", "name": "Interior Work", "parent_id": "7", "children": [], "activities": ["A7010", "A7020", "A7030", "A7040", "A7050", "A7060", "A7070"]}
+      ], "activities": []
+    },
+    {
+      "id": "8", "name": "MEP Trim", "parent_id": null, "children": [
+        {"id": "8.1", "name": "MEP Completion", "parent_id": "8", "children": [], "activities": ["A8010", "A8020", "A8030"]}
+      ], "activities": []
+    },
+    {
+      "id": "9", "name": "Exterior Finishes", "parent_id": null, "children": [
+        {"id": "9.1", "name": "Site & Exterior", "parent_id": "9", "children": [], "activities": ["A9010", "A9020", "A9030"]}
+      ], "activities": []
+    },
+    {
+      "id": "10", "name": "Closeout", "parent_id": null, "children": [
+        {"id": "10.1", "name": "Project Closeout", "parent_id": "10", "children": [], "activities": ["A10010", "A10020", "A10030"]}
+      ], "activities": []
+    }
+  ],
+  "activities": [
+    {"id": "A1010", "name": "Site Mobilization", "wbs_id": "1.1", "duration_days": 5, "predecessors": [], "resource": "General Contractor", "is_milestone": false},
+    {"id": "A1020", "name": "Building Permits & Submittals", "wbs_id": "1.1", "duration_days": 14, "predecessors": [{"predecessor_id": "A1010", "type": "FS", "lag_days": 0}], "resource": "Project Manager", "is_milestone": false},
+    {"id": "A1030", "name": "Temporary Facilities & Utilities", "wbs_id": "1.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A1010", "type": "FS", "lag_days": 0}], "resource": "General Contractor", "is_milestone": false},
+    {"id": "A2010", "name": "Clear & Grub Site", "wbs_id": "2.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A1020", "type": "FS", "lag_days": 0}], "resource": "Sitework Contractor", "is_milestone": false},
+    {"id": "A2020", "name": "Excavation & Grading", "wbs_id": "2.1", "duration_days": 8, "predecessors": [{"predecessor_id": "A2010", "type": "FS", "lag_days": 0}], "resource": "Excavation Contractor", "is_milestone": false},
+    {"id": "A2030", "name": "Underground Utilities", "wbs_id": "2.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A2020", "type": "FS", "lag_days": 0}], "resource": "Utility Contractor", "is_milestone": false},
+    {"id": "A3010", "name": "Footing Formwork & Rebar", "wbs_id": "3.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A2020", "type": "FS", "lag_days": 0}], "resource": "Foundation Contractor", "is_milestone": false},
+    {"id": "A3020", "name": "Pour & Cure Footings", "wbs_id": "3.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A3010", "type": "FS", "lag_days": 0}], "resource": "Concrete Crew", "is_milestone": false},
+    {"id": "A3030", "name": "Foundation Wall Formwork & Rebar", "wbs_id": "3.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A3020", "type": "FS", "lag_days": 3}], "resource": "Foundation Contractor", "is_milestone": false},
+    {"id": "A3040", "name": "Pour & Cure Foundation Walls", "wbs_id": "3.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A3030", "type": "FS", "lag_days": 0}], "resource": "Concrete Crew", "is_milestone": false},
+    {"id": "A3050", "name": "Foundation Waterproofing & Drain", "wbs_id": "3.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A3040", "type": "FS", "lag_days": 2}], "resource": "Waterproofing Contractor", "is_milestone": false},
+    {"id": "A3060", "name": "Backfill & Compact", "wbs_id": "3.1", "duration_days": 4, "predecessors": [{"predecessor_id": "A3050", "type": "FS", "lag_days": 0}], "resource": "Sitework Contractor", "is_milestone": false},
+    {"id": "A4010", "name": "1st Floor Framing", "wbs_id": "4.1", "duration_days": 12, "predecessors": [{"predecessor_id": "A3060", "type": "FS", "lag_days": 0}], "resource": "Framing Contractor", "is_milestone": false},
+    {"id": "A4020", "name": "2nd Floor Framing", "wbs_id": "4.1", "duration_days": 12, "predecessors": [{"predecessor_id": "A4010", "type": "FS", "lag_days": 0}], "resource": "Framing Contractor", "is_milestone": false},
+    {"id": "A4030", "name": "3rd Floor Framing", "wbs_id": "4.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A4020", "type": "FS", "lag_days": 0}], "resource": "Framing Contractor", "is_milestone": false},
+    {"id": "A4040", "name": "Roof Framing & Sheathing", "wbs_id": "4.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A4030", "type": "FS", "lag_days": 0}], "resource": "Framing Contractor", "is_milestone": false},
+    {"id": "A4050", "name": "Exterior Sheathing & House Wrap", "wbs_id": "4.1", "duration_days": 6, "predecessors": [{"predecessor_id": "A4040", "type": "SS", "lag_days": 5}], "resource": "Framing Contractor", "is_milestone": false},
+    {"id": "A5010", "name": "Roofing — Underlayment & Shingles", "wbs_id": "5.1", "duration_days": 8, "predecessors": [{"predecessor_id": "A4040", "type": "FS", "lag_days": 0}], "resource": "Roofing Contractor", "is_milestone": false},
+    {"id": "A5020", "name": "Windows & Exterior Doors", "wbs_id": "5.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A4050", "type": "FS", "lag_days": 0}], "resource": "Window/Door Installer", "is_milestone": false},
+    {"id": "A5030", "name": "Exterior Siding", "wbs_id": "5.1", "duration_days": 12, "predecessors": [{"predecessor_id": "A5020", "type": "FS", "lag_days": 0}], "resource": "Siding Contractor", "is_milestone": false},
+    {"id": "A5040", "name": "Exterior Paint & Caulking", "wbs_id": "5.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A5030", "type": "FS", "lag_days": 0}], "resource": "Painting Contractor", "is_milestone": false},
+    {"id": "A6010", "name": "Plumbing Rough-In", "wbs_id": "6.1", "duration_days": 15, "predecessors": [{"predecessor_id": "A4010", "type": "SS", "lag_days": 5}], "resource": "Plumbing Contractor", "is_milestone": false},
+    {"id": "A6020", "name": "Electrical Rough-In", "wbs_id": "6.1", "duration_days": 12, "predecessors": [{"predecessor_id": "A4010", "type": "SS", "lag_days": 5}], "resource": "Electrical Contractor", "is_milestone": false},
+    {"id": "A6030", "name": "HVAC Ductwork Rough-In", "wbs_id": "6.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A4020", "type": "SS", "lag_days": 3}], "resource": "HVAC Contractor", "is_milestone": false},
+    {"id": "A7010", "name": "Insulation", "wbs_id": "7.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A6010", "type": "FS", "lag_days": 0}, {"predecessor_id": "A6020", "type": "FS", "lag_days": 0}, {"predecessor_id": "A6030", "type": "FS", "lag_days": 0}], "resource": "Insulation Contractor", "is_milestone": false},
+    {"id": "A7020", "name": "Drywall Hang", "wbs_id": "7.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A7010", "type": "FS", "lag_days": 0}], "resource": "Drywall Contractor", "is_milestone": false},
+    {"id": "A7030", "name": "Drywall Tape, Mud & Finish", "wbs_id": "7.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A7020", "type": "FS", "lag_days": 0}], "resource": "Drywall Contractor", "is_milestone": false},
+    {"id": "A7040", "name": "Interior Paint — Prime & Finish", "wbs_id": "7.1", "duration_days": 12, "predecessors": [{"predecessor_id": "A7030", "type": "FS", "lag_days": 0}], "resource": "Painting Contractor", "is_milestone": false},
+    {"id": "A7050", "name": "Flooring — Hardwood, Tile & Carpet", "wbs_id": "7.1", "duration_days": 12, "predecessors": [{"predecessor_id": "A7040", "type": "FS", "lag_days": 0}], "resource": "Flooring Contractor", "is_milestone": false},
+    {"id": "A7060", "name": "Cabinets & Millwork", "wbs_id": "7.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A7050", "type": "SS", "lag_days": 5}], "resource": "Cabinet Installer", "is_milestone": false},
+    {"id": "A7070", "name": "Interior Trim & Doors", "wbs_id": "7.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A7060", "type": "FS", "lag_days": 0}], "resource": "Finish Carpenter", "is_milestone": false},
+    {"id": "A8010", "name": "Plumbing Trim — Fixtures & Connections", "wbs_id": "8.1", "duration_days": 6, "predecessors": [{"predecessor_id": "A7070", "type": "FS", "lag_days": 0}], "resource": "Plumbing Contractor", "is_milestone": false},
+    {"id": "A8020", "name": "Electrical Trim — Devices & Fixtures", "wbs_id": "8.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A7070", "type": "FS", "lag_days": 0}], "resource": "Electrical Contractor", "is_milestone": false},
+    {"id": "A8030", "name": "HVAC Equipment Startup & Balancing", "wbs_id": "8.1", "duration_days": 4, "predecessors": [{"predecessor_id": "A8010", "type": "FS", "lag_days": 0}, {"predecessor_id": "A8020", "type": "FS", "lag_days": 0}], "resource": "HVAC Contractor", "is_milestone": false},
+    {"id": "A9010", "name": "Concrete Flatwork & Driveway", "wbs_id": "9.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A3060", "type": "FS", "lag_days": 0}], "resource": "Concrete Crew", "is_milestone": false},
+    {"id": "A9020", "name": "Hardscape & Landscape", "wbs_id": "9.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A9010", "type": "FS", "lag_days": 0}], "resource": "Landscape Contractor", "is_milestone": false},
+    {"id": "A10010", "name": "Punch List & Corrections", "wbs_id": "10.1", "duration_days": 7, "predecessors": [{"predecessor_id": "A8030", "type": "FS", "lag_days": 0}, {"predecessor_id": "A9020", "type": "FS", "lag_days": 0}], "resource": "General Contractor", "is_milestone": false},
+    {"id": "A10020", "name": "Final Inspections", "wbs_id": "10.1", "duration_days": 3, "predecessors": [{"predecessor_id": "A10010", "type": "FS", "lag_days": 0}], "resource": "Building Inspector", "is_milestone": false},
+    {"id": "A10030", "name": "Certificate of Occupancy", "wbs_id": "10.1", "duration_days": 1, "predecessors": [{"predecessor_id": "A10020", "type": "FS", "lag_days": 0}], "resource": "Building Department", "is_milestone": true}
+  ]
+}

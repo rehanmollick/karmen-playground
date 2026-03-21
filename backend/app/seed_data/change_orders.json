@@ -1,0 +1,181 @@
+[
+  {
+    "id": "co-res-1",
+    "project_id": "residential",
+    "name": "Owner Upgrades HVAC to Geothermal System",
+    "description": "Owner directs upgrade from standard split-system HVAC to geothermal ground-source heat pump. Requires excavation for ground loops, new mechanical room layout, and extended commissioning.",
+    "source": "Owner Directive",
+    "affected_activities": ["A6030"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "A6031", "name": "Ground Loop Field Excavation", "wbs_id": "6.1", "duration_days": 8, "predecessors": [{"predecessor_id": "A2020", "type": "FS", "lag_days": 0}], "resource": "Excavation Contractor", "is_milestone": false},
+        {"id": "A6032", "name": "Ground Loop Piping Installation", "wbs_id": "6.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A6031", "type": "FS", "lag_days": 0}], "resource": "Geothermal Contractor", "is_milestone": false},
+        {"id": "A6033", "name": "Geothermal Heat Pump Equipment Set", "wbs_id": "6.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A6032", "type": "FS", "lag_days": 0}], "resource": "HVAC Contractor", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "A6030", "old_duration": 10, "new_duration": 18, "reason": "Extended HVAC rough-in to accommodate geothermal distribution manifold and refrigerant lines"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-res-2",
+    "project_id": "residential",
+    "name": "Soil Report Reveals Unexpected Rock at Foundation Depth",
+    "description": "Geotechnical investigation reveals granite bedrock at 3-foot depth, requiring rock blasting and removal before foundation construction can proceed. Schedule impact on critical path.",
+    "source": "Field Condition",
+    "affected_activities": ["A2020"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "A2021", "name": "Rock Blasting — Permits & Setup", "wbs_id": "2.1", "duration_days": 5, "predecessors": [{"predecessor_id": "A2020", "type": "FS", "lag_days": 0}], "resource": "Blasting Contractor", "is_milestone": false},
+        {"id": "A2022", "name": "Rock Excavation & Removal", "wbs_id": "2.1", "duration_days": 10, "predecessors": [{"predecessor_id": "A2021", "type": "FS", "lag_days": 0}], "resource": "Excavation Contractor", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "A2020", "old_duration": 8, "new_duration": 8, "reason": "No change to base excavation duration; rock work added as follow-on activities"}
+      ],
+      "new_dependencies": [
+        {"predecessor_id": "A2022", "type": "FS", "lag_days": 0}
+      ],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-res-3",
+    "project_id": "residential",
+    "name": "Owner Adds Rooftop Deck to 3rd Floor",
+    "description": "Owner requests addition of a 400 SF rooftop deck on the 3rd floor, requiring structural reinforcement of the roof, waterproofing membrane, composite decking, and glass railing system.",
+    "source": "Owner Directive",
+    "affected_activities": ["A4040", "A5010"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "A4041", "name": "Structural Reinforcement for Roof Deck", "wbs_id": "4.1", "duration_days": 6, "predecessors": [{"predecessor_id": "A4030", "type": "FS", "lag_days": 0}], "resource": "Structural Contractor", "is_milestone": false},
+        {"id": "A5011", "name": "Rooftop Deck Waterproofing Membrane", "wbs_id": "5.1", "duration_days": 4, "predecessors": [{"predecessor_id": "A4041", "type": "FS", "lag_days": 0}], "resource": "Waterproofing Contractor", "is_milestone": false},
+        {"id": "A5012", "name": "Composite Decking & Glass Railing", "wbs_id": "5.1", "duration_days": 8, "predecessors": [{"predecessor_id": "A5011", "type": "FS", "lag_days": 0}], "resource": "Specialty Contractor", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "A4040", "old_duration": 10, "new_duration": 12, "reason": "Additional framing required for rooftop deck structural support"},
+        {"activity_id": "A5010", "old_duration": 8, "new_duration": 10, "reason": "Roofing modified to accommodate deck penetrations and expanded scope"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-com-1",
+    "project_id": "commercial",
+    "name": "Architect Redesigns Open Office to Add 4 Private Offices",
+    "description": "Tenant requests conversion of 1,200 SF of open office to 4 private offices with glass fronts. Requires additional metal stud framing, HVAC zones, electrical circuits, and glass partition systems.",
+    "source": "Owner Directive",
+    "affected_activities": ["B5010", "B4030", "B4010"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "B5011", "name": "Private Office Framing — 4 Offices", "wbs_id": "5.1", "duration_days": 5, "predecessors": [{"predecessor_id": "B4010", "type": "FS", "lag_days": 0}], "resource": "Framing Contractor", "is_milestone": false},
+        {"id": "B5012", "name": "Glass Partition Systems — 4 Offices", "wbs_id": "5.1", "duration_days": 6, "predecessors": [{"predecessor_id": "B5011", "type": "FS", "lag_days": 0}], "resource": "Glass Partition Installer", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "B4030", "old_duration": 12, "new_duration": 16, "reason": "4 additional HVAC zones required for private offices — new ductwork branches"},
+        {"activity_id": "B4010", "old_duration": 10, "new_duration": 13, "reason": "Additional electrical circuits for private offices require panel reconfiguration"},
+        {"activity_id": "B5010", "old_duration": 10, "new_duration": 12, "reason": "Revised partition layout requires additional metal stud runs"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-com-2",
+    "project_id": "commercial",
+    "name": "Building Owner Requires After-Hours Work Only (6PM–6AM)",
+    "description": "Building management restricts all construction to after-hours (6PM–6AM) to protect existing tenant operations on adjacent floors. Reduces effective productivity by approximately 40%.",
+    "source": "Regulatory",
+    "affected_activities": ["B5030", "B5040", "B6010", "B6020", "B7010", "B7020"],
+    "fragnet": {
+      "new_activities": [],
+      "modified_activities": [
+        {"activity_id": "B5030", "old_duration": 10, "new_duration": 14, "reason": "After-hours restriction reduces productivity 40%; extended duration"},
+        {"activity_id": "B5040", "old_duration": 8, "new_duration": 12, "reason": "After-hours restriction reduces productivity 40%; extended duration"},
+        {"activity_id": "B6010", "old_duration": 5, "new_duration": 7, "reason": "After-hours restriction reduces productivity 40%; extended duration"},
+        {"activity_id": "B6020", "old_duration": 5, "new_duration": 7, "reason": "After-hours restriction reduces productivity 40%; extended duration"},
+        {"activity_id": "B7020", "old_duration": 6, "new_duration": 9, "reason": "After-hours restriction reduces productivity 40%; extended duration"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-com-3",
+    "project_id": "commercial",
+    "name": "IT Requirements Change — Raised Access Floor in Server Room",
+    "description": "Tenant's IT department requires a raised access floor system in the 800 SF server room to accommodate underfloor cable management and HVAC distribution. Requires MEP rerouting under floor.",
+    "source": "Owner Directive",
+    "affected_activities": ["B7030", "B4020"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "B7031", "name": "Raised Access Floor System — Server Room", "wbs_id": "7.1", "duration_days": 8, "predecessors": [{"predecessor_id": "B7030", "type": "FS", "lag_days": 0}], "resource": "Access Floor Contractor", "is_milestone": false},
+        {"id": "B4021", "name": "Underfloor MEP Distribution Reroute", "wbs_id": "4.1", "duration_days": 7, "predecessors": [{"predecessor_id": "B7031", "type": "FS", "lag_days": 0}], "resource": "MEP Contractor", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "B7030", "old_duration": 5, "new_duration": 5, "reason": "No change to base concrete work; raised floor added as follow-on activity"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-inf-1",
+    "project_id": "infrastructure",
+    "name": "Geotechnical Boring Reveals Karst Void Under East Abutment",
+    "description": "Additional geotechnical investigation reveals a karst dissolution void at 25-foot depth under Abutment A. DOT requires a grouting program to stabilize the void before foundation construction can proceed.",
+    "source": "Field Condition",
+    "affected_activities": ["C3020"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "C3021", "name": "Karst Investigation — Additional Borings", "wbs_id": "3.1", "duration_days": 7, "predecessors": [{"predecessor_id": "C3010", "type": "FS", "lag_days": 0}], "resource": "Geotechnical Engineer", "is_milestone": false},
+        {"id": "C3022", "name": "Void Grouting Program — Abutment A", "wbs_id": "3.1", "duration_days": 21, "predecessors": [{"predecessor_id": "C3021", "type": "FS", "lag_days": 0}], "resource": "Specialty Grouting Contractor", "is_milestone": false},
+        {"id": "C3023", "name": "Post-Grouting Verification Borings", "wbs_id": "3.1", "duration_days": 5, "predecessors": [{"predecessor_id": "C3022", "type": "FS", "lag_days": 0}], "resource": "Geotechnical Engineer", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "C3020", "old_duration": 14, "new_duration": 14, "reason": "Base drilled shaft duration unchanged; grouting program added as prerequisite"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-inf-2",
+    "project_id": "infrastructure",
+    "name": "Steel Fabricator Reports 6-Week Delivery Delay on Plate Girders",
+    "description": "The prestressed girder fabricator notifies that a raw material shortage will delay delivery of all girders by 6 weeks (42 calendar days). This directly impacts girder erection and all downstream activities.",
+    "source": "Field Condition",
+    "affected_activities": ["C5010"],
+    "fragnet": {
+      "new_activities": [],
+      "modified_activities": [
+        {"activity_id": "C5010", "old_duration": 45, "new_duration": 87, "reason": "6-week fabrication delay due to raw material shortage reported by precast plant"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  },
+  {
+    "id": "co-inf-3",
+    "project_id": "infrastructure",
+    "name": "DOT Adds Pedestrian Pathway to Bridge Design",
+    "description": "State DOT adds a 10-foot shared use path on the downstream side of the bridge per updated transportation policy. Requires deck widening, additional railing system, and lighting.",
+    "source": "Regulatory",
+    "affected_activities": ["C5020", "C5030", "C6030", "C7020"],
+    "fragnet": {
+      "new_activities": [
+        {"id": "C7021", "name": "Pedestrian Path Railing — Downstream", "wbs_id": "7.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C7010", "type": "FS", "lag_days": 0}], "resource": "Railing Contractor", "is_milestone": false},
+        {"id": "C9031", "name": "Pedestrian Path Lighting & Conduit", "wbs_id": "9.1", "duration_days": 10, "predecessors": [{"predecessor_id": "C7021", "type": "SS", "lag_days": 3}], "resource": "Electrical Contractor", "is_milestone": false}
+      ],
+      "modified_activities": [
+        {"activity_id": "C5020", "old_duration": 10, "new_duration": 14, "reason": "Wider deck requires additional girder erection work for extended span"},
+        {"activity_id": "C6030", "old_duration": 5, "new_duration": 8, "reason": "Wider deck increases concrete pour volume for pedestrian path extension"},
+        {"activity_id": "C7020", "old_duration": 10, "new_duration": 10, "reason": "No change to original railing; pedestrian path railing added as separate activity"}
+      ],
+      "new_dependencies": [],
+      "removed_dependencies": []
+    }
+  }
+]
