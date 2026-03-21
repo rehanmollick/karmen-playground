@@ -124,12 +124,13 @@ export default function GanttChart({
             })}
 
             {/* Bars */}
-            {bars.map((bar) => {
+            {bars.map((bar, index) => {
               const scaledBar = { ...bar, left: bar.left * zoom, width: bar.width * zoom };
               return (
                 <GanttBar
                   key={bar.activity.id}
                   bar={scaledBar}
+                  index={index}
                   highlighted={bar.activity.id === highlightedId}
                   newActivity={newActivityIds?.has(bar.activity.id)}
                   modifiedActivity={modifiedActivityIds?.has(bar.activity.id)}

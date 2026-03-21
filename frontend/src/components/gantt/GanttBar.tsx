@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import type { GanttBarData } from '../../lib/ganttUtils';
 import { ROW_HEIGHT } from '../../lib/ganttUtils';
 import { formatDate, formatDuration } from '../../lib/formatters';
 
 interface GanttBarProps {
   bar: GanttBarData;
+  index?: number;
   highlighted?: boolean;
-  newActivity?: boolean;    // purple — fragnet new
-  modifiedActivity?: boolean; // amber — fragnet modified
+  newActivity?: boolean;
+  modifiedActivity?: boolean;
 }
 
-export default function GanttBar({ bar, highlighted, newActivity, modifiedActivity }: GanttBarProps) {
+export default function GanttBar({ bar, index = 0, highlighted, newActivity, modifiedActivity }: GanttBarProps) {
   const [tooltip, setTooltip] = useState(false);
   const { activity, left, width, row } = bar;
 
@@ -32,29 +34,33 @@ export default function GanttBar({ bar, highlighted, newActivity, modifiedActivi
     const cy = barTop + 10;
     const size = 8;
     return (
-      <g
+      <motion.g
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: index * 0.03, duration: 0.2, ease: 'easeOut' }}
         onMouseEnter={() => setTooltip(true)}
         onMouseLeave={() => setTooltip(false)}
-        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
       >
         <polygon
           points={`${cx},${cy - size} ${cx + size},${cy} ${cx},${cy + size} ${cx - size},${cy}`}
           fill="var(--gantt-milestone)"
         />
-        {tooltip && (
-          <TooltipBox activity={activity} x={cx} y={cy - size - 8} />
-        )}
-      </g>
+        {tooltip && <TooltipBox activity={activity} x={cx} y={cy - size - 8} />}
+      </motion.g>
     );
   }
 
   return (
-    <g
+    <motion.g
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.03, duration: 0.25, ease: 'easeOut' }}
       onMouseEnter={() => setTooltip(true)}
       onMouseLeave={() => setTooltip(false)}
-      className="cursor-pointer"
+      style={{ cursor: 'pointer' }}
     >
-      <rect
+      <motion.rect
         x={left}
         y={barTop}
         width={Math.max(width, 4)}
@@ -62,6 +68,11 @@ export default function GanttBar({ bar, highlighted, newActivity, modifiedActivi
         fill={barColor}
         rx={0}
         opacity={newActivity || modifiedActivity ? 0.85 : 1}
+        animate={isCritical && !newActivity && !modifiedActivity ? {
+          opacity: [1, 0.6, 1],
+          scaleY: [1, 1.05, 1],
+        } : {}}
+        transition={isCritical ? { duration: 0.6, delay: index * 0.03 + 0.4, ease: 'easeInOut' } : {}}
       />
       {width > 48 && (
         <text
@@ -70,15 +81,12 @@ export default function GanttBar({ bar, highlighted, newActivity, modifiedActivi
           fontSize={10}
           fill="white"
           fontFamily="JetBrains Mono, monospace"
-          clipPath={`inset(0 0 0 ${left}px)`}
         >
           {activity.id}
         </text>
       )}
-      {tooltip && (
-        <TooltipBox activity={activity} x={left + width / 2} y={barTop - 8} />
-      )}
-    </g>
+      {tooltip && <TooltipBox activity={activity} x={left + width / 2} y={barTop - 8} />}
+    </motion.g>
   );
 }
 
@@ -89,16 +97,16 @@ function TooltipBox({ activity, x, y }: { activity: GanttBarProps['bar']['activi
     `${formatDuration(activity.duration_days)} · Float: ${activity.total_float ?? '—'}d`,
     `ES: ${formatDate(activity.early_start)} · EF: ${formatDate(activity.early_finish)}`,
   ];
-  const width = 220;
+  const w = 220;
   const lineH = 14;
   const padding = 8;
   const height = lines.length * lineH + padding * 2;
-  const tx = Math.max(width / 2, x) - width / 2;
+  const tx = Math.max(w / 2, x) - w / 2;
   const ty = y - height;
 
   return (
     <g>
-      <rect x={tx} y={ty} width={width} height={height} fill="var(--text-primary)" rx={4} opacity={0.92} />
+      <rect x={tx} y={ty} width={w} height={height} fill="var(--text-primary)" rx={4} opacity={0.92} />
       {lines.map((line, i) => (
         <text
           key={i}

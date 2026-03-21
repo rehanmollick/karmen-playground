@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   BarChart,
   Bar,
@@ -28,7 +29,12 @@ export default function TornadoChart({ sensitivity }: TornadoChartProps) {
   }));
 
   return (
-    <div className="w-full h-full">
+    <motion.div
+      className="w-full h-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Sensitivity (Spearman Correlation)</h3>
       <ResponsiveContainer width="100%" height={Math.max(data.length * 28 + 40, 200)}>
         <BarChart
@@ -73,6 +79,6 @@ export default function TornadoChart({ sensitivity }: TornadoChartProps) {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   );
 }
