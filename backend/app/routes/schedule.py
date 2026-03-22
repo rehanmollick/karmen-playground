@@ -44,6 +44,20 @@ async def get_project_route(project_id: str):
     return project
 
 
+@router.patch("/projects/{project_id}")
+async def update_project(project_id: str, body: dict = Body(...)):
+    """Replace a project in the store with updated data (used for applying change orders)."""
+    if get_project(project_id) is None:
+        raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
+    try:
+        project = Project(**body)
+        project = apply_cpm_to_project(project)
+        set_project(project_id, project)
+        return project
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
 @router.post("/schedule/generate")
 async def generate_schedule(request: Request, body: dict = Body(...)):
     scope_text = body.get("scope_text", "").strip()
