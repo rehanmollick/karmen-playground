@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, type MouseEvent } from 'react';
+import { useState, useEffect, useRef, type MouseEvent } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import AnimatedNetworkBackground from '../shared/AnimatedNetworkBackground';
+import HeroGanttAnimation from '../shared/HeroGanttAnimation';
 import type { ProjectSummary } from '../../types/schedule';
 
 interface ProjectSelectorProps {
@@ -12,7 +12,7 @@ interface ProjectSelectorProps {
   isGenerating?: boolean;
 }
 
-// ─── Project Icons (refined line art, 52x52) ─────────────────────────────────
+// ─── Project Icons (refined line art, 52×52) ────────────────────────────────
 
 const ResidentialIcon = () => (
   <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden>
@@ -76,7 +76,9 @@ const PROJECT_ICONS: Record<string, React.ReactNode> = {
 
 const PROJECT_TYPES = ['residential', 'commercial', 'infrastructure', 'industrial', 'healthcare'];
 
-// ─── 3D Tilt Card ─────────────────────────────────────────────────────────────
+const DEMO_SCOPE = '3-story residential build with geothermal HVAC, rooftop deck, and solar panel installation';
+
+// ─── 3D Tilt Card ───────────────────────────────────────────────────────────
 
 interface CardProps {
   project: ProjectSummary;
@@ -109,7 +111,6 @@ function ProjectCard({ project, onClick, index }: CardProps) {
     setMousePos({ x: 0.5, y: 0.5 });
   }
 
-  // Unique accent color per card
   const accents = [
     { border: 'rgba(59,130,246,0.35)', gradient: 'rgba(59,130,246,0.08)', icon: '#3B82F6' },
     { border: 'rgba(45,212,191,0.35)', gradient: 'rgba(45,212,191,0.08)', icon: '#2DD4BF' },
@@ -133,7 +134,7 @@ function ProjectCard({ project, onClick, index }: CardProps) {
           : `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${hovered ? 1.02 : 1})`,
         transition: 'transform 0.18s ease-out, box-shadow 0.25s ease, border-color 0.25s ease',
         background: hovered
-          ? `linear-gradient(145deg, rgba(255,255,255,0.97), rgba(249,250,251,0.95))`
+          ? 'linear-gradient(145deg, rgba(255,255,255,0.97), rgba(249,250,251,0.95))'
           : 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
@@ -153,7 +154,7 @@ function ProjectCard({ project, onClick, index }: CardProps) {
         }}
       />
 
-      {/* Top accent line — gradient */}
+      {/* Top accent line */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
         style={{
@@ -168,7 +169,7 @@ function ProjectCard({ project, onClick, index }: CardProps) {
       />
 
       <div className="relative z-10">
-        {/* Icon with colored background circle */}
+        {/* Icon */}
         <div
           className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-colors duration-200"
           style={{
@@ -187,7 +188,7 @@ function ProjectCard({ project, onClick, index }: CardProps) {
           {project.description || 'Full CPM schedule with critical path analysis'}
         </p>
 
-        {/* Stats row */}
+        {/* Stats */}
         <div className="flex items-center gap-3 text-[11px]">
           <span className="flex items-center gap-1.5 font-mono text-[var(--text-muted)]">
             <span
@@ -203,7 +204,7 @@ function ProjectCard({ project, onClick, index }: CardProps) {
         </div>
       </div>
 
-      {/* Hover arrow indicator */}
+      {/* Hover arrow */}
       <div
         className="absolute bottom-6 right-6 flex items-center gap-1.5 text-xs font-medium"
         style={{
@@ -222,28 +223,31 @@ function ProjectCard({ project, onClick, index }: CardProps) {
   );
 }
 
-// ─── Entrance Animation Variants ─────────────────────────────────────────────
+// ─── Animation Variants ─────────────────────────────────────────────────────
 
-const heroEase = [0.22, 1, 0.36, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const cardContainerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.12, delayChildren: 0.7 },
+    transition: { staggerChildren: 0.12, delayChildren: 0.8 },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 35, scale: 0.96 },
+  hidden: { opacity: 0, y: 30, scale: 0.97 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.6, ease: heroEase },
+    transition: { duration: 0.55, ease: EASE },
   },
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// Subtle vertical offset per card for asymmetry
+const CARD_OFFSETS = ['', 'xl:-translate-y-2', 'xl:translate-y-1'];
+
+// ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function ProjectSelector({
   projects,
@@ -255,206 +259,286 @@ export default function ProjectSelector({
   const [projectType, setProjectType] = useState('residential');
   const prefersReduced = useReducedMotion();
 
+  // ─── Typing demo state ──────────────────────────────────────────────────
+  const [demoText, setDemoText] = useState('');
+  const [demoActive, setDemoActive] = useState(true);
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const isFirstRun = useRef(true);
+
+  useEffect(() => {
+    if (!demoActive) return;
+
+    let charIdx = 0;
+    let interval: ReturnType<typeof setInterval>;
+
+    // First load: wait for entrance animations. Refocus: shorter delay.
+    const delay = isFirstRun.current ? 2500 : 600;
+    isFirstRun.current = false;
+
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        charIdx++;
+        if (charIdx <= DEMO_SCOPE.length) {
+          setDemoText(DEMO_SCOPE.slice(0, charIdx));
+        } else {
+          clearInterval(interval);
+        }
+      }, 45);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, [demoActive]);
+
+  useEffect(() => {
+    if (!demoActive) return;
+    const blink = setInterval(() => setCursorVisible(v => !v), 530);
+    return () => clearInterval(blink);
+  }, [demoActive]);
+
+  function handleTextareaFocus() {
+    setDemoActive(false);
+    setDemoText('');
+  }
+
+  function handleTextareaBlur() {
+    if (!customScope) {
+      setDemoActive(true);
+    }
+  }
+
   function handleGenerate() {
     if (customScope.trim()) onGenerate(customScope.trim(), projectType);
   }
 
-  const animProps = prefersReduced ? { initial: false as const } : {};
-
   return (
-    <div className="relative flex flex-col items-center overflow-hidden min-h-[90vh]">
-      {/* CPM network background */}
-      <AnimatedNetworkBackground />
-
-      {/* Noise / grain texture overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[1]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '128px 128px',
-        }}
-      />
-
-      {/* Animated ambient glow behind heading */}
-      <motion.div
-        className="absolute pointer-events-none z-[2]"
-        initial={prefersReduced ? false : { opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5, ease: 'easeOut' }}
-        style={{
-          top: '40px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '900px',
-          height: '450px',
-          background: `
-            radial-gradient(ellipse 100% 80% at 40% 50%, rgba(59,130,246,0.08) 0%, transparent 60%),
-            radial-gradient(ellipse 80% 100% at 65% 40%, rgba(45,212,191,0.05) 0%, transparent 55%)
-          `,
-          filter: 'blur(60px)',
-          animation: prefersReduced ? 'none' : 'glowPulse 8s ease-in-out infinite alternate',
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-5xl mx-auto px-8 pt-20 pb-24">
-
-        {/* Pink pill badge — Karmen signature */}
-        <motion.div
-          initial={prefersReduced ? false : { opacity: 0, y: 12, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.05, ease: heroEase }}
-          className="mb-6"
-        >
-          <span
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-medium tracking-wide"
-            style={{
-              backgroundColor: 'var(--accent-pink-light)',
-              color: 'var(--accent-pink)',
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M6 1L7.5 4.5L11 5.5L8.5 8L9 11.5L6 9.5L3 11.5L3.5 8L1 5.5L4.5 4.5L6 1Z" fill="currentColor" opacity="0.7" />
-            </svg>
-            AI-Powered Construction Scheduling
-          </span>
-        </motion.div>
-
-        {/* Hero heading — gradient text + character-level animation */}
-        <motion.h1
-          className="text-center mb-4"
-          initial={prefersReduced ? false : { opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: heroEase }}
-          style={{
-            fontSize: 'clamp(52px, 6vw, 76px)',
-            lineHeight: 1.05,
-            letterSpacing: '-0.03em',
-            fontWeight: 700,
-          }}
-        >
-          <span style={{ color: 'var(--text-primary)' }}>Karmen</span>
-          <span
-            style={{
-              background: 'linear-gradient(135deg, #3B82F6 0%, #2DD4BF 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              marginLeft: '0.15em',
-            }}
-          >
-            Playground
-          </span>
-        </motion.h1>
-
-        {/* Subheading */}
-        <motion.p
-          initial={prefersReduced ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.35, ease: heroEase }}
-          className="text-[17px] text-[var(--text-secondary)] text-center leading-relaxed max-w-lg mb-4"
-          style={{ textWrap: 'balance' } as React.CSSProperties}
-        >
-          Select a project below — or describe your own scope
-          and watch the AI build a CPM schedule in seconds.
-        </motion.p>
-
-        {/* Feature highlights — tiny stat badges */}
-        <motion.div
-          initial={prefersReduced ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5, ease: heroEase }}
-          className="flex items-center gap-5 mb-14"
-        >
-          {[
-            { label: 'Critical Path', icon: '◆' },
-            { label: 'Monte Carlo', icon: '◇' },
-            { label: 'Change Orders', icon: '△' },
-          ].map((feat) => (
-            <span
-              key={feat.label}
-              className="flex items-center gap-1.5 text-[12px] text-[var(--text-muted)] font-medium"
+    <div>
+      {/* ─── Hero Section: Split Layout ─── */}
+      <section className="max-w-[1200px] mx-auto px-8 pt-16 pb-20">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr,1.2fr] gap-12 xl:gap-16 items-center">
+          {/* Left: Copy */}
+          <div className="text-center xl:text-left">
+            {/* Pink badge */}
+            <motion.div
+              initial={prefersReduced ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05, ease: EASE }}
+              className="mb-5 flex justify-center xl:justify-start"
             >
-              <span className="text-[var(--blue-primary)] text-[10px]">{feat.icon}</span>
-              {feat.label}
-            </span>
-          ))}
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-wide"
+                style={{ backgroundColor: 'var(--accent-pink-light)', color: 'var(--accent-pink)' }}
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M5 0.5L6.2 3.8L9.5 4.5L7 6.5L7.5 9.5L5 8L2.5 9.5L3 6.5L0.5 4.5L3.8 3.8L5 0.5Z" fill="currentColor" opacity="0.7" />
+                </svg>
+                AI-Powered Scheduling
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={prefersReduced ? false : { opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15, ease: EASE }}
+              className="mb-5"
+              style={{
+                fontSize: 'clamp(36px, 4.5vw, 54px)',
+                lineHeight: 1.08,
+                letterSpacing: '-0.035em',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+              }}
+            >
+              From scope to
+              <br />
+              schedule{' '}
+              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>—</span>{' '}
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #3B82F6 0%, #2DD4BF 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                in seconds.
+              </span>
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={prefersReduced ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3, ease: EASE }}
+              className="text-[15px] leading-relaxed mb-8 max-w-md mx-auto xl:mx-0"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Generate CPM schedules, simulate change orders, and run
+              Monte Carlo risk analysis — all powered by AI.
+            </motion.p>
+
+            {/* Feature pills */}
+            <motion.div
+              initial={prefersReduced ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45, ease: EASE }}
+              className="flex flex-wrap items-center gap-2.5 justify-center xl:justify-start"
+            >
+              {[
+                { label: 'Critical Path Analysis', color: '#EF4444' },
+                { label: 'Change Order Simulation', color: '#8B5CF6' },
+                { label: 'Monte Carlo Risk', color: '#3B82F6' },
+              ].map((feat) => (
+                <span
+                  key={feat.label}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium"
+                  style={{
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-default)',
+                    background: 'var(--bg-secondary)',
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: feat.color }} />
+                  {feat.label}
+                </span>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right: Animated Gantt chart */}
+          <div className="hidden xl:block">
+            <HeroGanttAnimation />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Sample Projects ─── */}
+      <section className="max-w-[1080px] mx-auto px-8 pb-16">
+        <motion.div
+          initial={prefersReduced ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.65, duration: 0.4 }}
+          className="mb-7"
+        >
+          <span
+            className="text-[11px] font-medium tracking-[0.1em] uppercase"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            Select a sample project
+          </span>
         </motion.div>
 
-        {/* Project cards */}
         <motion.div
-          className="grid grid-cols-3 gap-5 w-full"
+          className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2"
           variants={cardContainerVariants}
-          initial="hidden"
+          initial={prefersReduced ? false : 'hidden'}
           animate="visible"
-          {...animProps}
         >
           {projects.map((project, i) => (
-            <motion.div key={project.id} variants={cardVariants}>
+            <motion.div
+              key={project.id}
+              variants={cardVariants}
+              className={CARD_OFFSETS[i] || ''}
+            >
               <ProjectCard project={project} onClick={() => onSelect(project.id)} index={i} />
             </motion.div>
           ))}
         </motion.div>
+      </section>
 
-        {/* Divider */}
+      {/* ─── Custom Scope ─── */}
+      <section className="max-w-2xl mx-auto px-8 pb-24">
         <motion.div
-          initial={prefersReduced ? false : { opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.5, delay: 1.2, ease: heroEase }}
-          className="flex items-center gap-4 w-full max-w-2xl mt-16 mb-10"
-          style={{ transformOrigin: 'center' }}
-        >
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
-          <span className="text-[11px] text-[var(--text-muted)] font-medium tracking-[0.15em] uppercase whitespace-nowrap">
-            or describe your own scope
-          </span>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[var(--border-default)] to-transparent" />
-        </motion.div>
-
-        {/* Scope input area */}
-        <motion.div
-          initial={prefersReduced ? false : { opacity: 0, y: 14 }}
+          initial={prefersReduced ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 1.35, ease: heroEase }}
-          className="w-full max-w-2xl"
+          transition={{ delay: 1.2, duration: 0.4, ease: EASE }}
         >
+          {/* Divider */}
+          <div className="flex items-center gap-4 mb-10">
+            <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
+            <span
+              className="text-[11px] font-medium tracking-[0.12em] uppercase whitespace-nowrap"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              or describe your own scope
+            </span>
+            <div className="flex-1 h-px" style={{ background: 'var(--border-default)' }} />
+          </div>
+
           {/* Project type pills */}
           <div className="flex items-center gap-2 mb-3.5 flex-wrap">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">Project type:</span>
+            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              Project type:
+            </span>
             {PROJECT_TYPES.map((type) => (
               <button
                 key={type}
                 onClick={() => setProjectType(type)}
                 className={`px-3 py-1 rounded-full text-xs font-medium capitalize transition-all duration-150 ${
                   projectType === type
-                    ? 'bg-[var(--blue-primary)] text-white shadow-sm'
-                    : 'bg-white/80 text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--blue-muted)] hover:text-[var(--text-primary)]'
+                    ? 'text-white shadow-sm'
+                    : 'hover:text-[var(--text-primary)]'
                 }`}
+                style={
+                  projectType === type
+                    ? { backgroundColor: 'var(--blue-primary)' }
+                    : {
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-secondary)',
+                        background: 'white',
+                      }
+                }
               >
                 {type}
               </button>
             ))}
           </div>
 
-          {/* Textarea with glow border on focus */}
-          <div className="relative group/input">
+          {/* Textarea with typing demo overlay */}
+          <div className="relative">
             <textarea
               value={customScope}
               onChange={(e) => setCustomScope(e.target.value)}
-              placeholder="e.g., 3-story residential build with geothermal HVAC and rooftop deck..."
-              rows={3}
-              className="w-full px-5 py-4 text-sm text-[var(--text-primary)] bg-white/90 backdrop-blur-sm border border-[var(--border-default)] rounded-xl resize-none outline-none transition-all duration-200 placeholder:text-[var(--text-muted)] focus:border-[var(--blue-primary)] focus:bg-white"
-              style={{
-                boxShadow: 'var(--shadow-sm)',
-              }}
               onFocus={(e) => {
+                handleTextareaFocus();
+                e.currentTarget.style.borderColor = 'var(--blue-primary)';
                 e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.08), 0 4px 12px rgba(0,0,0,0.04)';
               }}
               onBlur={(e) => {
+                handleTextareaBlur();
+                e.currentTarget.style.borderColor = 'var(--border-default)';
                 e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
               }}
+              placeholder={!demoActive ? 'Describe your construction project scope...' : ''}
+              rows={3}
+              className="w-full px-5 py-4 text-sm rounded-xl resize-none outline-none transition-all duration-200"
+              style={{
+                color: 'var(--text-primary)',
+                background: 'white',
+                border: '1px solid var(--border-default)',
+                boxShadow: 'var(--shadow-sm)',
+              }}
             />
+            {/* Typing demo overlay */}
+            {demoActive && !customScope && (
+              <div
+                className="absolute inset-0 pointer-events-none px-5 py-4 text-sm rounded-xl"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {demoText}
+                <span
+                  className="inline-block w-[2px] h-[15px] align-middle ml-px rounded-sm"
+                  style={{
+                    backgroundColor: 'var(--blue-primary)',
+                    opacity: cursorVisible ? 0.6 : 0,
+                    transition: 'opacity 0.08s',
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Generate button */}
@@ -470,13 +554,11 @@ export default function ProjectSelector({
               onMouseEnter={(e) => {
                 if (!e.currentTarget.disabled) {
                   e.currentTarget.style.backgroundColor = 'var(--blue-hover)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(59,130,246,0.3), 0 2px 4px rgba(0,0,0,0.06)';
                   e.currentTarget.style.transform = 'translateY(-1px)';
                 }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--blue-primary)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.25), 0 1px 2px rgba(0,0,0,0.06)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -491,15 +573,7 @@ export default function ProjectSelector({
             </button>
           </div>
         </motion.div>
-      </div>
-
-      {/* Bottom gradient fade to white */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-[3]"
-        style={{
-          background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.8) 60%, white 100%)',
-        }}
-      />
+      </section>
     </div>
   );
 }
