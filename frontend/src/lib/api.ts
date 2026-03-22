@@ -47,6 +47,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(config),
     }),
+  chat: (projectId: string, message: string, history: Array<{ role: string; content: string }>) =>
+    apiFetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: projectId, message, history }),
+    }),
   exportXmlUrl: (projectId: string) =>
     `${API_URL}/api/export/${projectId}?format=xml`,
 };

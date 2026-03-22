@@ -16,7 +16,7 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Schedule loaded. Ask me to make changes — for example: "Add a 5-day inspection hold after framing" or "Extend the foundation work by 3 days".',
+      content: "I'm your scheduling assistant. Ask me anything about this project's schedule, or tell me to make changes.",
       streaming: false,
     },
   ]);
@@ -34,6 +34,12 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
     if (!text || loading) return;
 
     const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text };
+
+    // Build history from current messages (excluding welcome)
+    const history = messages
+      .filter((m) => m.id !== 'welcome')
+      .map((m) => ({ role: m.role, content: m.content }));
+
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
@@ -41,21 +47,25 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
     const thinkingId = (Date.now() + 1).toString();
     setMessages((prev) => [
       ...prev,
-      { id: thinkingId, role: 'assistant', content: 'Updating schedule…', streaming: false },
+      { id: thinkingId, role: 'assistant', content: 'Thinking…', streaming: false },
     ]);
 
     try {
-      const result = await api.editSchedule(projectId, text) as { summary?: string };
-      const summary = result?.summary || 'Schedule updated.';
+      const result = await api.chat(projectId, text, history) as { type: string; content?: string; summary?: string };
+      const isEdit = result?.type === 'edit';
+      const responseText = isEdit ? (result.summary || 'Schedule updated.') : (result.content || 'Done.');
 
       setMessages((prev) =>
         prev.map((m) =>
           m.id === thinkingId
-            ? { ...m, content: summary, streaming: true }
+            ? { ...m, content: responseText, streaming: true }
             : m
         )
       );
-      onScheduleUpdate?.();
+
+      if (isEdit) {
+        onScheduleUpdate?.();
+      }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : 'Something went wrong. Try again.';
       setMessages((prev) =>
@@ -103,7 +113,7 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
+            placeholder="Ask a question or request a change..."
             rows={2}
             disabled={loading}
             className="flex-1 px-3 py-2 text-sm text-[var(--text-primary)] bg-white border border-[var(--border-default)] rounded-[var(--radius-sm)] resize-none outline-none focus:border-[var(--blue-primary)] transition-colors placeholder:text-[var(--text-muted)] disabled:opacity-60"
