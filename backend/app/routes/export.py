@@ -15,7 +15,9 @@ async def export_project(project_id: str, format: str = "xml"):
 
     if format == "xml":
         xml_content = generate_msproject_xml(project)
-        filename = project.name.replace(" ", "_").replace("/", "-") + ".xml"
+        # Strip non-ASCII chars (em dashes etc.) so Content-Disposition header stays latin-1 safe
+        safe_name = project.name.encode("ascii", "ignore").decode("ascii")
+        filename = safe_name.replace(" ", "_").replace("/", "-").strip("_") + ".xml"
         return Response(
             content=xml_content,
             media_type="application/xml",
