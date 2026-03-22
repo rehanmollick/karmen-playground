@@ -2,29 +2,24 @@ from fastapi import APIRouter, HTTPException
 
 from app.models.risk import SimulationConfig, SimulationResult, UncertaintyRange
 from app.services.monte_carlo import run_simulation
+from app.services.project_store import get_project
 
 router = APIRouter()
 
 
 @router.post("/risk/simulate", response_model=SimulationResult)
 async def simulate_risk(config: SimulationConfig):
-    from app.routes.schedule import _projects
-
-    if config.project_id not in _projects:
+    project = get_project(config.project_id)
+    if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{config.project_id}' not found")
-
-    project = _projects[config.project_id]
     return run_simulation(project, config)
 
 
 @router.get("/risk/defaults/{project_id}")
 async def get_risk_defaults(project_id: str):
-    from app.routes.schedule import _projects
-
-    if project_id not in _projects:
+    project = get_project(project_id)
+    if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
-
-    project = _projects[project_id]
     critical_set = set(project.critical_path)
 
     critical_acts = [a for a in project.activities if a.id in critical_set and not a.is_milestone]

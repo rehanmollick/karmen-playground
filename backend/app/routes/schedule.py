@@ -7,33 +7,16 @@ from datetime import date
 
 from app.models.schedule import Project, ProjectSummary, Activity, Dependency, WBSNode
 from app.services.cpm_engine import apply_cpm_to_project
+from app.services.project_store import get_projects, get_project, set_project, load_seed_projects
 from app.cache.cache_manager import cache
 
 router = APIRouter()
 
-# In-memory project store
-_projects: dict = {}
-
-
-def _load_seed_projects():
-    import os
-
-    seed_dir = os.path.join(os.path.dirname(__file__), "..", "seed_data")
-    for pid in ["residential", "commercial", "infrastructure"]:
-        fp = os.path.join(seed_dir, f"{pid}.json")
-        if os.path.exists(fp):
-            with open(fp) as f:
-                data = json.load(f)
-            try:
-                project = Project(**data)
-                project = apply_cpm_to_project(project)
-                _projects[project.id] = project
-            except Exception as e:
-                print(f"Warning: could not load {pid}: {e}")
-
+# Keep _projects as a local alias for backwards-compat within this module
+_projects = get_projects()
 
 try:
-    _load_seed_projects()
+    load_seed_projects()
 except Exception as e:
     print(f"Warning: seed load failed: {e}")
 
@@ -49,15 +32,16 @@ async def list_projects():
             duration_days=p.project_duration_days,
             project_type=p.project_type,
         )
-        for p in _projects.values()
+        for p in get_projects().values()
     ]
 
 
 @router.get("/projects/{project_id}", response_model=Project)
-async def get_project(project_id: str):
-    if project_id not in _projects:
+async def get_project_route(project_id: str):
+    project = get_project(project_id)
+    if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
-    return _projects[project_id]
+    return project
 
 
 @router.post("/schedule/generate")
@@ -95,7 +79,7 @@ async def generate_schedule(request: Request, body: dict = Body(...)):
         activities=_parse_activities(llm_data.get("activities", [])),
     )
     project = apply_cpm_to_project(project)
-    _projects[project.id] = project
+    set_project(project.id, project)
 
     result = project.model_dump(mode="json")
     cache.set_by_key(cache_key, result)
@@ -107,7 +91,7 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
     project_id = body.get("project_id", "")
     instruction = body.get("instruction", "").strip()
 
-    if project_id not in _projects:
+    if get_project(project_id) is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     if not instruction:
         raise HTTPException(status_code=400, detail="instruction is required")
@@ -119,7 +103,7 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
             detail="Rate limit reached. This is a demo — for the full experience, reach out to the Karmen team!",
         )
 
-    project = copy.deepcopy(_projects[project_id])
+    project = copy.deepcopy(get_project(project_id))
 
     from app.services.llm_service import edit_schedule_nl
 
@@ -166,7 +150,7 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
                 diff.append({"type": "add_dependency", "from": from_id, "to": to_id})
 
     project = apply_cpm_to_project(project)
-    _projects[project.id] = project
+    set_project(project.id, project)
 
     return {
         "project": project.model_dump(mode="json"),
