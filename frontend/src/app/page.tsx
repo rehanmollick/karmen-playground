@@ -115,7 +115,11 @@ export default function Home() {
     setShowImpacted(false);
     try {
       const result = await api.analyzeCustomChangeOrder(activeProject.id, name, description, source) as AnalysisResult;
-      setCOAnalysis(result);
+      if (result?.impact && result?.modified_project) {
+        setCOAnalysis(result);
+      } else {
+        setCOAnalysis(null);
+      }
     } catch {
       setCOAnalysis(null);
     } finally {

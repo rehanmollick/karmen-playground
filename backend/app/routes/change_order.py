@@ -149,7 +149,7 @@ async def analyze_custom_change_order(request: Request, body: dict = Body(...)):
     from app.services.llm_service import analyze_change_order_llm
 
     llm_result = await analyze_change_order_llm(
-        project.model_dump(mode="json"), name, description, source
+        project.model_dump(mode="json"), name, description, source, use_flash=True
     )
     fragnet_data = llm_result.get("fragnet", {})
     narrative = llm_result.get("narrative", "Impact analysis unavailable.")

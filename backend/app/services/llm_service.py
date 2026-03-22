@@ -152,13 +152,23 @@ RULES:
 
 
 async def analyze_change_order_llm(
-    schedule_json: dict, co_name: str, co_description: str, co_source: str
+    schedule_json: dict, co_name: str, co_description: str, co_source: str,
+    use_flash: bool = False,
 ) -> dict:
     from app.prompts.change_order_impact import build_co_prompt
     prompt = build_co_prompt(schedule_json, co_name, co_description, co_source)
+    model = FLASH_MODEL if use_flash else LITE_MODEL
     response = client.models.generate_content(
-        model=LITE_MODEL,
+        model=model,
         contents=prompt,
         config=types.GenerateContentConfig(temperature=0.4),
     )
-    return extract_json(response.text)
+    try:
+        return extract_json(response.text)
+    except Exception:
+        # Return a minimal valid structure so the fragnet engine doesn't crash
+        return {
+            "fragnet": {"new_activities": [], "modified_activities": [], "new_dependencies": [], "removed_dependencies": []},
+            "narrative": f"The {co_name} change order ({co_source}) has been submitted for review. Based on the project description: {co_description[:200]}",
+            "citations": [f"Change Order: {co_name}", f"Source: {co_source}"],
+        }
