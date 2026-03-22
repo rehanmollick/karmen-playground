@@ -103,6 +103,15 @@ export default function Home() {
     setActiveTab(tab);
   }
 
+  function handleGoHome() {
+    clearProject();
+    setCOAnalysis(null);
+    setSelectedCOId(null);
+    setShowImpacted(false);
+    setChangeOrders([]);
+    setActiveTab('schedule');
+  }
+
   function handleExport() {
     if (!activeProject) return;
     window.open(api.exportXmlUrl(activeProject.id), '_blank');
@@ -141,7 +150,7 @@ export default function Home() {
         Best viewed on a desktop (1280px+). Some features may not display correctly on smaller screens.
       </div>
 
-      <Navbar onExport={handleExport} showExport={!!activeProject} />
+      <Navbar onExport={handleExport} showExport={!!activeProject} onGoHome={activeProject ? handleGoHome : undefined} />
 
       {/* Generating overlay */}
       <AnimatePresence>
