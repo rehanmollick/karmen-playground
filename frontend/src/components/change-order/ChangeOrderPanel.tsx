@@ -23,13 +23,14 @@ interface ChangeOrderPanelProps {
   changeOrders: ChangeOrder[];
   customCOs: CustomCO[];
   selectedId: string | null;
+  appliedIds?: Set<string>;
   onSelect: (id: string) => void;
   /** Called when user submits a custom CO. Parent should register the CO and trigger analysis. */
   onSubmitCustom?: (id: string, name: string, description: string, source: string) => void;
   isAnalyzing?: boolean;
 }
 
-export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, onSelect, onSubmitCustom, isAnalyzing }: ChangeOrderPanelProps) {
+export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, appliedIds, onSelect, onSubmitCustom, isAnalyzing }: ChangeOrderPanelProps) {
   const [customName, setCustomName] = useState('');
   const [customDesc, setCustomDesc] = useState('');
   const [customSource, setCustomSource] = useState('Owner Directive');
@@ -61,6 +62,7 @@ export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, 
         {/* Pre-built COs */}
         {changeOrders.map((co) => {
           const isSelected = co.id === selectedId;
+          const isApplied = appliedIds?.has(co.id) ?? false;
           const sourceColor = SOURCE_COLORS[co.source] || 'var(--text-muted)';
 
           return (
@@ -71,15 +73,19 @@ export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, 
                 w-full text-left p-3 rounded-[var(--radius-md)] border transition-all
                 ${isSelected
                   ? 'border-[var(--blue-primary)] bg-[var(--blue-light)]'
+                  : isApplied
+                  ? 'border-[var(--success-green)] bg-green-50'
                   : 'border-[var(--border-default)] bg-white hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)]'
                 }
               `}
             >
               <div className="flex items-start justify-between gap-2 mb-1">
                 <span className="text-xs font-semibold text-[var(--text-primary)] leading-tight">{co.name}</span>
-                {isSelected && isAnalyzing && (
+                {isApplied ? (
+                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-green-100 text-green-700 flex-shrink-0">✓ Applied</span>
+                ) : isSelected && isAnalyzing ? (
                   <span className="w-3 h-3 border-2 border-[var(--blue-primary)] border-t-transparent rounded-full animate-spin flex-shrink-0 mt-0.5" />
-                )}
+                ) : null}
               </div>
               <p className="text-xs text-[var(--text-secondary)] mb-2 line-clamp-2">{co.description}</p>
               <div className="flex items-center gap-2">
@@ -100,6 +106,7 @@ export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, 
         {/* Custom COs that have been submitted */}
         {customCOs.map((co) => {
           const isSelected = co.id === selectedId;
+          const isApplied = appliedIds?.has(co.id) ?? false;
           const sourceColor = SOURCE_COLORS[co.source] || 'var(--text-muted)';
           return (
             <button
@@ -109,16 +116,20 @@ export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, 
                 w-full text-left p-3 rounded-[var(--radius-md)] border transition-all
                 ${isSelected
                   ? 'border-[var(--blue-primary)] bg-[var(--blue-light)]'
+                  : isApplied
+                  ? 'border-[var(--success-green)] bg-green-50'
                   : 'border-[var(--border-default)] bg-white hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)]'
                 }
               `}
             >
               <div className="flex items-start justify-between gap-2 mb-1">
                 <span className="text-xs font-semibold text-[var(--text-primary)] leading-tight">{co.name}</span>
-                <div className="flex items-center gap-1">
-                  {isSelected && isAnalyzing && (
-                    <span className="w-3 h-3 border-2 border-[var(--blue-primary)] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                  )}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {isApplied ? (
+                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-green-100 text-green-700">✓ Applied</span>
+                  ) : isSelected && isAnalyzing ? (
+                    <span className="w-3 h-3 border-2 border-[var(--blue-primary)] border-t-transparent rounded-full animate-spin" />
+                  ) : null}
                   <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-[var(--accent-pink-light)] text-[var(--accent-pink)]">Custom</span>
                 </div>
               </div>
