@@ -75,22 +75,6 @@ export default function ProjectSelector({ projects, onSelect, onGenerate, isGene
         />
       </div>
 
-      {/* Badge row */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="flex items-center gap-3 mb-6"
-      >
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--accent-pink-light)] text-[var(--accent-pink)]">
-          AI Construction Scheduling
-        </span>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--blue-light)] text-[var(--blue-primary)] border border-[var(--blue-primary)] border-opacity-20">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--blue-primary)] animate-pulse" />
-          Live Demo
-        </span>
-      </motion.div>
-
       {/* Hero heading */}
       <motion.h1
         initial={{ opacity: 0, y: 10 }}
