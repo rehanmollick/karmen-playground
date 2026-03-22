@@ -11,11 +11,11 @@ interface UncertaintySlidersProps {
   isRunning?: boolean;
 }
 
-function getRiskLabel(opt: number, ml: number, pess: number): { label: string; color: string; bg: string } {
+function getRiskLevel(opt: number, ml: number, pess: number): { label: string; color: string; bg: string } {
   const spread = (pess - opt) / ml;
-  if (spread < 0.35) return { label: 'Low Risk', color: 'var(--success-green)', bg: 'bg-green-50' };
-  if (spread < 0.7) return { label: 'Medium Risk', color: 'var(--warning-amber)', bg: 'bg-amber-50' };
-  return { label: 'High Risk', color: 'var(--critical-red)', bg: 'bg-red-50' };
+  if (spread < 0.35) return { label: 'Low', color: 'var(--success-green)', bg: 'bg-green-50' };
+  if (spread < 0.7) return { label: 'Medium', color: 'var(--warning-amber)', bg: 'bg-amber-50' };
+  return { label: 'High', color: 'var(--critical-red)', bg: 'bg-red-50' };
 }
 
 export default function UncertaintySliders({ ranges: initialRanges, activities, onRunSimulation, isRunning }: UncertaintySlidersProps) {
@@ -30,17 +30,24 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
     );
   }
 
-  // Range slider: dragging the "best case" or "worst case" handles
-  function handleRangeEnd(activityId: string, field: 'optimistic_days' | 'pessimistic_days', rawValue: number) {
-    const range = ranges.find((r) => r.activity_id === activityId);
-    if (!range) return;
-    if (field === 'optimistic_days') {
-      const clamped = Math.min(rawValue, range.most_likely_days - 1);
-      updateRange(activityId, 'optimistic_days', Math.max(1, clamped));
-    } else {
-      const clamped = Math.max(rawValue, range.most_likely_days + 1);
-      updateRange(activityId, 'pessimistic_days', clamped);
-    }
+  function setOptimistic(activityId: string, val: number) {
+    setRanges((prev) =>
+      prev.map((r) => {
+        if (r.activity_id !== activityId) return r;
+        const clamped = Math.max(1, Math.min(val, r.most_likely_days - 1));
+        return { ...r, optimistic_days: clamped };
+      })
+    );
+  }
+
+  function setPessimistic(activityId: string, val: number) {
+    setRanges((prev) =>
+      prev.map((r) => {
+        if (r.activity_id !== activityId) return r;
+        const clamped = Math.max(r.most_likely_days + 1, val);
+        return { ...r, pessimistic_days: clamped };
+      })
+    );
   }
 
   return (
@@ -50,10 +57,9 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
         <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--accent-pink-light)] text-[var(--accent-pink)] mb-2">
           Risk Analysis
         </span>
-        {mode === 'simple' && (
+        {mode === 'simple' ? (
           <p className="text-xs text-[var(--text-muted)]">How uncertain is each task? Wider range = more schedule risk.</p>
-        )}
-        {mode === 'advanced' && (
+        ) : (
           <p className="text-xs text-[var(--text-muted)]">Set three-point duration estimates per activity.</p>
         )}
       </div>
@@ -61,26 +67,19 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
       {/* Mode toggle */}
       <div className="px-4 pt-3 pb-2">
         <div className="inline-flex rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] p-0.5 text-xs">
-          <button
-            onClick={() => setMode('simple')}
-            className={`px-3 py-1 rounded-full font-medium transition-colors ${
-              mode === 'simple'
-                ? 'bg-white text-[var(--blue-primary)] shadow-[var(--shadow-sm)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            Simple
-          </button>
-          <button
-            onClick={() => setMode('advanced')}
-            className={`px-3 py-1 rounded-full font-medium transition-colors ${
-              mode === 'advanced'
-                ? 'bg-white text-[var(--blue-primary)] shadow-[var(--shadow-sm)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            Advanced
-          </button>
+          {(['simple', 'advanced'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`px-3 py-1 rounded-full font-medium capitalize transition-colors ${
+                mode === m
+                  ? 'bg-white text-[var(--blue-primary)] shadow-[var(--shadow-sm)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+              }`}
+            >
+              {m}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -89,17 +88,12 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
         {ranges.map((range) => {
           const activity = activityMap.get(range.activity_id);
           const isCritical = activity?.is_critical;
-          const risk = getRiskLabel(range.optimistic_days, range.most_likely_days, range.pessimistic_days);
+          const risk = getRiskLevel(range.optimistic_days, range.most_likely_days, range.pessimistic_days);
 
           if (mode === 'simple') {
-            // Visual range slider bounds
-            const minVal = Math.max(1, Math.floor(range.optimistic_days * 0.5));
-            const maxVal = Math.ceil(range.pessimistic_days * 1.5);
-            const span = maxVal - minVal;
-
-            const optPct = ((range.optimistic_days - minVal) / span) * 100;
-            const mlPct = ((range.most_likely_days - minVal) / span) * 100;
-            const pessPct = ((range.pessimistic_days - minVal) / span) * 100;
+            const optMax = Math.max(1, range.most_likely_days - 1);
+            const pessMin = range.most_likely_days + 1;
+            const pessMax = Math.ceil(range.most_likely_days * 2.5);
 
             return (
               <div
@@ -108,9 +102,9 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
                   isCritical ? 'border-red-200 bg-red-50' : 'border-[var(--border-default)] bg-white'
                 }`}
               >
-                {/* Header row */}
-                <div className="flex items-start justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-[var(--text-primary)] leading-tight pr-2">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-2">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] leading-tight pr-2 flex-1">
                     {activity?.name || range.activity_id}
                   </span>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -118,7 +112,7 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
                       <span className="text-[9px] font-medium text-[var(--critical-red)] px-1.5 py-0.5 bg-red-100 rounded">CRITICAL</span>
                     )}
                     <span
-                      className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${risk.bg}`}
+                      className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${risk.bg}`}
                       style={{ color: risk.color }}
                     >
                       {risk.label}
@@ -126,61 +120,48 @@ export default function UncertaintySliders({ ranges: initialRanges, activities, 
                   </div>
                 </div>
 
-                {/* Plain language duration */}
-                <p className="text-[11px] text-[var(--text-muted)] mb-2.5">
-                  {range.most_likely_days} days (could be {range.optimistic_days}–{range.pessimistic_days})
+                <p className="text-[11px] text-[var(--text-muted)] mb-3">
+                  {range.most_likely_days} days expected (could be {range.optimistic_days}–{range.pessimistic_days})
                 </p>
 
-                {/* Visual range bar */}
-                <div className="relative h-5 mb-2">
-                  {/* Track background */}
-                  <div className="absolute top-1/2 -translate-y-1/2 w-full h-1.5 bg-[var(--bg-tertiary)] rounded-full" />
-                  {/* Filled range */}
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full"
-                    style={{
-                      left: `${optPct}%`,
-                      width: `${pessPct - optPct}%`,
-                      backgroundColor: isCritical ? 'var(--critical-red)' : 'var(--blue-muted)',
-                      opacity: 0.5,
-                    }}
-                  />
-                  {/* Expected marker */}
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white"
-                    style={{
-                      left: `calc(${mlPct}% - 6px)`,
-                      backgroundColor: isCritical ? 'var(--critical-red)' : 'var(--blue-primary)',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                    }}
-                  />
-                  {/* Best case slider */}
+                {/* Best case slider */}
+                <div className="mb-2">
+                  <div className="flex justify-between text-[10px] text-[var(--text-muted)] mb-1">
+                    <label>Best Case</label>
+                    <span className="font-mono font-medium text-[var(--success-green)]">{range.optimistic_days}d</span>
+                  </div>
                   <input
                     type="range"
-                    min={minVal}
-                    max={range.most_likely_days - 1}
+                    min={1}
+                    max={optMax}
                     value={range.optimistic_days}
-                    onChange={(e) => handleRangeEnd(range.activity_id, 'optimistic_days', parseInt(e.target.value))}
-                    className="absolute inset-0 w-full opacity-0 cursor-pointer"
-                    style={{ zIndex: 10 }}
-                  />
-                  {/* Worst case slider overlaid */}
-                  <input
-                    type="range"
-                    min={range.most_likely_days + 1}
-                    max={maxVal}
-                    value={range.pessimistic_days}
-                    onChange={(e) => handleRangeEnd(range.activity_id, 'pessimistic_days', parseInt(e.target.value))}
-                    className="absolute inset-0 w-full opacity-0 cursor-pointer"
-                    style={{ zIndex: 10 }}
+                    onChange={(e) => setOptimistic(range.activity_id, parseInt(e.target.value))}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                    style={{ accentColor: 'var(--success-green)' }}
                   />
                 </div>
 
-                {/* Labels below slider */}
-                <div className="flex justify-between text-[10px] text-[var(--text-muted)]">
-                  <span>Best {range.optimistic_days}d</span>
-                  <span className="text-[var(--text-secondary)] font-medium">Expected {range.most_likely_days}d</span>
-                  <span>Worst {range.pessimistic_days}d</span>
+                {/* Expected (read-only center marker) */}
+                <div className="flex items-center gap-2 py-1.5 px-2 rounded bg-[var(--bg-tertiary)] mb-2">
+                  <span className="text-[10px] text-[var(--text-muted)] flex-1">Expected</span>
+                  <span className="font-mono text-xs font-semibold text-[var(--text-primary)]">{range.most_likely_days}d</span>
+                </div>
+
+                {/* Worst case slider */}
+                <div>
+                  <div className="flex justify-between text-[10px] text-[var(--text-muted)] mb-1">
+                    <label>Worst Case</label>
+                    <span className="font-mono font-medium text-[var(--critical-red)]">{range.pessimistic_days}d</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={pessMin}
+                    max={pessMax}
+                    value={range.pessimistic_days}
+                    onChange={(e) => setPessimistic(range.activity_id, parseInt(e.target.value))}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                    style={{ accentColor: 'var(--critical-red)' }}
+                  />
                 </div>
               </div>
             );

@@ -16,6 +16,7 @@ import UncertaintySliders from '../components/risk/UncertaintySliders';
 import CompletionDistribution from '../components/risk/CompletionDistribution';
 import TornadoChart from '../components/risk/TornadoChart';
 import RiskSummary from '../components/risk/RiskSummary';
+import RiskNarrative from '../components/risk/RiskNarrative';
 import LoadingAnimation from '../components/shared/LoadingAnimation';
 import { useSchedule } from '../hooks/useSchedule';
 import { useSimulation } from '../hooks/useSimulation';
@@ -420,6 +421,10 @@ export default function Home() {
                         <div className="bg-white border border-[var(--border-default)] rounded-[var(--radius-md)] p-4">
                           <TornadoChart sensitivity={simulationResult.sensitivity} />
                         </div>
+                        <RiskNarrative
+                          result={simulationResult}
+                          deterministicDate={simulationResult.deterministic_date}
+                        />
                       </>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-20">

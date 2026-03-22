@@ -16,28 +16,28 @@ const STAT_CONFIG = [
 
 export default function RiskSummary({ result, deterministicDate }: RiskSummaryProps) {
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
       {/* Planned finish */}
       <div className="bg-[var(--bg-secondary)] rounded-[var(--radius-md)] p-4 border border-[var(--border-default)]">
-        <div className="text-xs font-medium text-[var(--text-muted)] mb-2">Planned Finish</div>
-        <div className="font-mono text-base font-semibold text-[var(--text-primary)]">
+        <div className="text-xs font-medium text-[var(--text-muted)] mb-2 uppercase tracking-wide">Planned Finish</div>
+        <div className="font-mono text-lg font-bold text-[var(--text-primary)] leading-tight">
           {formatDate(deterministicDate)}
         </div>
-        <div className="text-xs text-[var(--text-muted)] mt-1.5">{result.total_iterations.toLocaleString()} runs</div>
+        <div className="text-xs text-[var(--text-muted)] mt-2">{result.total_iterations.toLocaleString()} iterations</div>
       </div>
 
       {STAT_CONFIG.map(({ label, sublabel, key, color, bg, border }) => {
         const delta = daysBetween(deterministicDate, result[key]);
         return (
           <div key={key} className={`${bg} rounded-[var(--radius-md)] p-4 border ${border}`}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-sm font-bold" style={{ color }}>{label}</span>
-              <span className="text-xs text-[var(--text-muted)]">— {sublabel}</span>
+            <div className="flex items-baseline gap-1.5 mb-2">
+              <span className="text-base font-bold" style={{ color }}>{label}</span>
+              <span className="text-xs text-[var(--text-muted)]">{sublabel}</span>
             </div>
-            <div className="font-mono text-base font-semibold" style={{ color }}>
+            <div className="font-mono text-lg font-bold leading-tight" style={{ color }}>
               {formatDate(result[key])}
             </div>
-            <div className="text-xs text-[var(--text-muted)] mt-1.5">
+            <div className="text-xs text-[var(--text-muted)] mt-2">
               {delta > 0 ? `+${delta} days from planned` : delta < 0 ? `${delta} days from planned` : 'on planned date'}
             </div>
           </div>
