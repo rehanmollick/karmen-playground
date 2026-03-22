@@ -82,6 +82,9 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProject?.id, loadRiskDefaults]);
 
+  // Map from custom CO id -> {name, description, source} for re-running analysis
+  const [customCOMap, setCustomCOMap] = useState<Record<string, { name: string; description: string; source: string }>>({});
+
   const handleSelectCO = useCallback(async (coId: string) => {
     if (!activeProject) return;
     setSelectedCOId(coId);
@@ -89,7 +92,29 @@ export default function Home() {
     setCOAnalysis(null);
     setShowImpacted(false);
     try {
-      const result = await api.analyzeChangeOrder(activeProject.id, coId) as AnalysisResult;
+      // If it's a custom CO, use the custom endpoint
+      const customData = customCOMap[coId];
+      const result = customData
+        ? await api.analyzeCustomChangeOrder(activeProject.id, customData.name, customData.description, customData.source) as AnalysisResult
+        : await api.analyzeChangeOrder(activeProject.id, coId) as AnalysisResult;
+      setCOAnalysis(result);
+    } catch {
+      setCOAnalysis(null);
+    } finally {
+      setCOAnalyzing(false);
+    }
+  }, [activeProject, customCOMap]);
+
+  const handleSubmitCustomCO = useCallback(async (id: string, name: string, description: string, source: string) => {
+    if (!activeProject) return;
+    // Register the custom CO first, then immediately analyze
+    setCustomCOMap((prev) => ({ ...prev, [id]: { name, description, source } }));
+    setSelectedCOId(id);
+    setCOAnalyzing(true);
+    setCOAnalysis(null);
+    setShowImpacted(false);
+    try {
+      const result = await api.analyzeCustomChangeOrder(activeProject.id, name, description, source) as AnalysisResult;
       setCOAnalysis(result);
     } catch {
       setCOAnalysis(null);
@@ -141,7 +166,10 @@ export default function Home() {
     ? coAnalysis.modified_project
     : activeProject;
 
-  const selectedCO = changeOrders.find((co) => co.id === selectedCOId);
+  const selectedCO = changeOrders.find((co) => co.id === selectedCOId)
+    ?? (selectedCOId && customCOMap[selectedCOId]
+      ? { id: selectedCOId, ...customCOMap[selectedCOId] }
+      : null);
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg-primary)]">
@@ -282,6 +310,7 @@ export default function Home() {
                       changeOrders={changeOrders}
                       selectedId={selectedCOId}
                       onSelect={handleSelectCO}
+                      onSubmitCustom={handleSubmitCustomCO}
                       isAnalyzing={coAnalyzing}
                     />
                   </div>

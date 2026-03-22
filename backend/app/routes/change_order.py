@@ -124,3 +124,65 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
     }
     cache.set_by_key(cache_key, result)
     return result
+
+
+@router.post("/change-order/custom")
+async def analyze_custom_change_order(request: Request, body: dict = Body(...)):
+    project_id = body.get("project_id", "")
+    name = body.get("name", "Custom Change Order").strip()
+    description = body.get("description", "").strip()
+    source = body.get("source", "Owner Directive")
+
+    project = get_project(project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
+    if not description:
+        raise HTTPException(status_code=400, detail="description is required")
+
+    client_ip = request.client.host if request.client else "unknown"
+    if not cache.check_rate_limit(client_ip):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit reached. This is a demo — for the full experience, reach out to the Karmen team!",
+        )
+
+    from app.services.llm_service import analyze_change_order_llm
+
+    llm_result = await analyze_change_order_llm(
+        project.model_dump(mode="json"), name, description, source
+    )
+    fragnet_data = llm_result.get("fragnet", {})
+    narrative = llm_result.get("narrative", "Impact analysis unavailable.")
+    citations = llm_result.get("citations", [])
+
+    new_acts = []
+    for act_data in fragnet_data.get("new_activities", []):
+        preds = [Dependency(**d) for d in act_data.get("predecessors", [])]
+        new_acts.append(
+            Activity(
+                id=act_data.get("id", ""),
+                name=act_data.get("name", ""),
+                wbs_id=act_data.get("wbs_id", "1.1"),
+                duration_days=act_data.get("duration_days", 5),
+                predecessors=preds,
+                resource=act_data.get("resource"),
+                is_milestone=act_data.get("is_milestone", False),
+            )
+        )
+    modified_acts = [ActivityDelta(**d) for d in fragnet_data.get("modified_activities", [])]
+    new_deps = [Dependency(**d) for d in fragnet_data.get("new_dependencies", [])]
+    fragnet = Fragnet(
+        new_activities=new_acts,
+        modified_activities=modified_acts,
+        new_dependencies=new_deps,
+        removed_dependencies=fragnet_data.get("removed_dependencies", []),
+    )
+
+    modified_project = apply_fragnet(project, fragnet)
+    impact = compute_impact(project, modified_project, narrative, citations, fragnet)
+
+    return {
+        "impact": impact.model_dump(mode="json"),
+        "modified_project": modified_project.model_dump(mode="json"),
+        "original_project": project.model_dump(mode="json"),
+    }
