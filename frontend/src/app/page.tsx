@@ -281,7 +281,6 @@ export default function Home() {
                   exit="exit"
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="absolute inset-0 flex"
-                  style={{ height: 'calc(100vh - 112px)' }}
                 >
                   {/* Left: Activity Table */}
                   <div className="w-[45%] border-r border-[var(--border-default)] flex flex-col min-h-0">
@@ -349,7 +348,6 @@ export default function Home() {
                   exit="exit"
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="absolute inset-0 flex"
-                  style={{ height: 'calc(100vh - 112px)' }}
                 >
                   {/* Left: CO list */}
                   <div className="w-72 border-r border-[var(--border-default)] overflow-y-auto flex-shrink-0">
@@ -422,7 +420,6 @@ export default function Home() {
                   exit="exit"
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="absolute inset-0 flex"
-                  style={{ height: 'calc(100vh - 112px)' }}
                 >
                   {/* Left: sliders */}
                   <div className="w-80 border-r border-[var(--border-default)] overflow-hidden flex flex-col flex-shrink-0">
