@@ -47,13 +47,13 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
     const thinkingId = (Date.now() + 1).toString();
     setMessages((prev) => [
       ...prev,
-      { id: thinkingId, role: 'assistant', content: 'Thinking…', streaming: false },
+      { id: thinkingId, role: 'assistant', content: '…', streaming: false },
     ]);
 
     try {
-      const result = await api.chat(projectId, text, history) as { type: string; content?: string; summary?: string };
+      const result = await api.chat(projectId, text, history) as { type: string; content?: string };
       const isEdit = result?.type === 'edit';
-      const responseText = isEdit ? (result.summary || 'Schedule updated.') : (result.content || 'Done.');
+      const responseText = result?.content || (isEdit ? 'Schedule updated.' : 'Done.');
 
       setMessages((prev) =>
         prev.map((m) =>
