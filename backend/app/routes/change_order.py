@@ -5,6 +5,7 @@ import json
 from app.models.change_order import ChangeOrder, ImpactAnalysis, Fragnet, ActivityDelta
 from app.models.schedule import Activity, Dependency
 from app.services.fragnet_engine import apply_fragnet, compute_impact
+from app.services.project_store import get_project
 from app.cache.cache_manager import cache
 
 router = APIRouter()
@@ -43,14 +44,11 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
     project_id = body.get("project_id", "")
     co_id = body.get("change_order_id", "")
 
-    from app.routes.schedule import _projects
-
-    if project_id not in _projects:
+    project = get_project(project_id)
+    if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     if co_id not in _change_orders:
         raise HTTPException(status_code=404, detail=f"Change order '{co_id}' not found")
-
-    project = _projects[project_id]
     co = _change_orders[co_id]
 
     cache_key = f"co:{project_id}:{co_id}"
