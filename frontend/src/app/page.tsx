@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import TabNav, { type TabId } from '../components/layout/TabNav';
@@ -177,6 +177,15 @@ export default function Home() {
     if (!activeProject) return;
     window.open(api.exportXmlUrl(activeProject.id), '_blank');
   }
+
+  const riskScrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top so stat boxes are fully visible when results load
+  useEffect(() => {
+    if (simulationResult && riskScrollRef.current) {
+      riskScrollRef.current.scrollTop = 0;
+    }
+  }, [simulationResult]);
 
   function handleRunSimulation(ranges: UncertaintyRange[]) {
     if (!activeProject) return;
@@ -431,48 +440,40 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Right: stat boxes (fixed) + scrollable charts */}
-                  <div className="flex-1 flex flex-col min-h-0">
-                    {/* Stat boxes — always visible, never scroll away */}
-                    {simulationResult && (
-                      <div className="px-6 pt-5 pb-4 border-b border-[var(--border-subtle)] flex-shrink-0">
-                        <RiskSummary
-                          result={simulationResult}
-                          deterministicDate={simulationResult.deterministic_date}
-                        />
-                      </div>
-                    )}
-                    {/* Scrollable chart area */}
-                    <div className="flex-1 overflow-y-auto">
-                      <div className="p-6 space-y-6">
-                        {simulationResult ? (
-                          <>
-                            <div className="bg-white border border-[var(--border-default)] rounded-[var(--radius-md)] p-4">
-                              <CompletionDistribution result={simulationResult} />
-                            </div>
-                            <div className="bg-white border border-[var(--border-default)] rounded-[var(--radius-md)] p-4">
-                              <TornadoChart sensitivity={simulationResult.sensitivity} />
-                            </div>
-                            <RiskNarrative
-                              result={simulationResult}
-                              deterministicDate={simulationResult.deterministic_date}
-                            />
-                          </>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-20">
-                            <div className="w-16 h-16 rounded-full bg-[var(--blue-light)] flex items-center justify-center">
-                              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                                <path d="M4 20L8 14L12 17L16 10L20 13L24 6" stroke="var(--blue-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <line x1="4" y1="22" x2="24" y2="22" stroke="var(--blue-muted)" strokeWidth="1.5" />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">Ready to simulate</p>
-                              <p className="text-xs text-[var(--text-muted)]">Set your uncertainty ranges and run 10,000 simulations.</p>
-                            </div>
+                  {/* Right: all content in one scroll container */}
+                  <div ref={riskScrollRef} className="flex-1 overflow-y-auto">
+                    <div className="p-6 space-y-6">
+                      {simulationResult ? (
+                        <>
+                          <RiskSummary
+                            result={simulationResult}
+                            deterministicDate={simulationResult.deterministic_date}
+                          />
+                          <div className="bg-white border border-[var(--border-default)] rounded-[var(--radius-md)] p-4">
+                            <CompletionDistribution result={simulationResult} />
                           </div>
-                        )}
-                      </div>
+                          <div className="bg-white border border-[var(--border-default)] rounded-[var(--radius-md)] p-4">
+                            <TornadoChart sensitivity={simulationResult.sensitivity} />
+                          </div>
+                          <RiskNarrative
+                            result={simulationResult}
+                            deterministicDate={simulationResult.deterministic_date}
+                          />
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-32 text-center gap-4">
+                          <div className="w-16 h-16 rounded-full bg-[var(--blue-light)] flex items-center justify-center">
+                            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                              <path d="M4 20L8 14L12 17L16 10L20 13L24 6" stroke="var(--blue-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <line x1="4" y1="22" x2="24" y2="22" stroke="var(--blue-muted)" strokeWidth="1.5" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-[var(--text-primary)] mb-1">Ready to simulate</p>
+                            <p className="text-xs text-[var(--text-muted)]">Set your uncertainty ranges and run 10,000 simulations.</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
