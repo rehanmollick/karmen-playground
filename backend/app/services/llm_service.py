@@ -56,67 +56,99 @@ async def edit_schedule_nl(schedule_json: dict, instruction: str) -> dict:
     return extract_json(response.text)
 
 
-async def chat_with_schedule(schedule_json: dict, message: str, history: list) -> dict:
+async def chat_with_schedule(project_data: dict, message: str, history: list) -> dict:
     """
-    Handle a chat message in the context of a project schedule.
+    Smart chat: detects if user wants to edit the schedule or ask a question.
     Returns {"type": "answer", "content": str} or {"type": "edit", "mutations": list, "summary": str}.
     """
     import json as _json
 
-    # Summarize the schedule to keep prompt size manageable
-    activities = schedule_json.get("activities", [])
-    critical_path = schedule_json.get("critical_path", [])
-    act_summary = "\n".join(
-        f"  {a['id']}: {a['name']} ({a['duration_days']}d)"
-        + (" [CRITICAL]" if a['id'] in critical_path else "")
+    activities = project_data.get("activities", [])
+    activities_summary = _json.dumps([
+        {
+            "id": a["id"], "name": a["name"], "duration": a["duration_days"],
+            "start": a.get("start_date"), "end": a.get("end_date"),
+            "critical": a.get("is_critical", False), "float": a.get("total_float"),
+        }
         for a in activities[:40]
-    )
-    if len(activities) > 40:
-        act_summary += f"\n  ... and {len(activities) - 40} more activities"
+    ], indent=2)
 
-    history_text = ""
-    for msg in history:
-        role = msg.get("role", "user")
-        content = msg.get("content", "")
-        history_text += f"\n{role.upper()}: {content}"
+    critical_path = project_data.get("critical_path", [])
 
-    system_prompt = f"""You are a construction scheduling expert assistant with full context of the current project schedule.
+    system_prompt = f"""You are an expert construction scheduling assistant embedded in a scheduling application.
+You have FULL context of the current project schedule.
 
-PROJECT: {schedule_json.get('name', 'Unknown')} ({schedule_json.get('project_type', 'construction')})
-START DATE: {schedule_json.get('start_date', 'N/A')}
-DURATION: {schedule_json.get('project_duration_days', 'N/A')} days
-ACTIVITIES ({len(activities)} total, {len(critical_path)} on critical path):
-{act_summary}
-CRITICAL PATH IDs: {', '.join(critical_path[:15])}{'...' if len(critical_path) > 15 else ''}
+PROJECT: {project_data.get('name', 'Unknown')}
+DESCRIPTION: {project_data.get('description', '')}
+START DATE: {project_data.get('start_date', '')}
+END DATE: {project_data.get('project_end_date', '')}
+TOTAL DURATION: {project_data.get('project_duration_days', 0)} days
+CRITICAL PATH: {', '.join(critical_path)}
 
-INSTRUCTIONS:
-- If the user asks a QUESTION about the schedule, construction methods, sequencing, risks, dependencies, CPM concepts, or anything else — respond with a clear, helpful plain text answer.
-- If the user asks you to MODIFY the schedule (add/remove/change activities, adjust durations, add dependencies) — respond with a JSON mutations object.
+ACTIVITIES:
+{activities_summary}
 
-For questions: respond with EXACTLY this JSON:
-{{"type": "answer", "content": "your detailed answer here"}}
+RULES:
+- If the user asks a QUESTION about the schedule, construction methods, sequencing, risks, terminology, or anything related: respond with a clear, helpful plain text answer. Reference specific activities by name and ID when relevant.
+- If the user asks you to MODIFY the schedule (add/remove/change activities, durations, dependencies): respond with ONLY a JSON object (no other text) in this exact format:
+{{
+  "mutations": [
+    {{"type": "modify_duration", "activity_id": "A1030", "new_value": 15}},
+    {{"type": "add_activity", "activity": {{"id": "A9010", "name": "New Task", "wbs_id": "1.1", "duration_days": 5, "predecessors": [{{"predecessor_id": "A1030", "type": "FS", "lag_days": 0}}], "resource": "General", "is_milestone": false}}}},
+    {{"type": "remove_activity", "activity_id": "A1025"}},
+    {{"type": "add_dependency", "from_id": "A1040", "to_id": "A1050", "dep_type": "FS", "lag_days": 0}}
+  ],
+  "summary": "Brief description of what was changed"
+}}
+- NEVER mix JSON and plain text in the same response.
+- Be specific. Reference activity IDs and names. Show you understand the schedule.
+- For questions about risk, delays, or "what if" scenarios, give substantive answers using the actual schedule data."""
 
-For edits: respond with EXACTLY this JSON:
-{{"type": "edit", "summary": "what you changed", "mutations": [
-  {{"type": "modify_duration", "activity_id": "A001", "new_value": 10}},
-  {{"type": "add_activity", "activity": {{"id": "NEW1", "name": "New Task", "wbs_id": "1.1", "duration_days": 5, "predecessors": [{{"predecessor_id": "A001", "type": "FS", "lag_days": 0}}]}}}},
-  {{"type": "remove_activity", "activity_id": "A002"}},
-  {{"type": "add_dependency", "from_id": "A001", "to_id": "A003", "dep_type": "FS", "lag_days": 0}}
-]}}
+    # Build conversation with history
+    conversation_parts = [system_prompt]
+    for h in history:
+        role = "user" if h.get("role") == "user" else "model"
+        conversation_parts.append(f"\n{role}: {h.get('content', '')}")
+    conversation_parts.append(f"\nuser: {message}")
 
-Respond ONLY with valid JSON. No markdown, no prose outside the JSON."""
-
-    contents = system_prompt
-    if history_text:
-        contents += f"\n\nCONVERSATION HISTORY:{history_text}"
-    contents += f"\n\nUSER: {message}"
+    full_prompt = "\n".join(conversation_parts)
 
     response = client.models.generate_content(
         model=FLASH_MODEL,
-        contents=contents,
+        contents=full_prompt,
         config=types.GenerateContentConfig(temperature=0.3),
     )
-    return extract_json(response.text)
+    response_text = response.text
+
+    # Detect if response is a JSON edit or a plain text answer
+    stripped = response_text.strip()
+
+    if stripped.startswith("{") and "mutations" in stripped:
+        try:
+            parsed = _json.loads(stripped)
+            return {
+                "type": "edit",
+                "mutations": parsed.get("mutations", []),
+                "summary": parsed.get("summary", "Schedule updated."),
+            }
+        except _json.JSONDecodeError:
+            pass
+
+    # Handle ```json fenced blocks
+    if "```json" in stripped:
+        json_block = stripped.split("```json")[1].split("```")[0].strip()
+        try:
+            parsed = _json.loads(json_block)
+            if "mutations" in parsed:
+                return {
+                    "type": "edit",
+                    "mutations": parsed.get("mutations", []),
+                    "summary": parsed.get("summary", "Schedule updated."),
+                }
+        except _json.JSONDecodeError:
+            pass
+
+    return {"type": "answer", "content": response_text}
 
 
 async def analyze_change_order_llm(
