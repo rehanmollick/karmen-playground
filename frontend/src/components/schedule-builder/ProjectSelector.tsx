@@ -46,9 +46,9 @@ const PROJECT_TYPES = ['residential', 'commercial', 'infrastructure', 'industria
 
 const STATS = [
   { value: '3', label: 'sample projects' },
-  { value: '130+', label: 'activities' },
-  { value: 'Real', label: 'CPM engine' },
-  { value: '10K', label: 'Monte Carlo runs' },
+  { value: 'Schedule', label: 'generation' },
+  { value: 'Change order', label: 'analysis' },
+  { value: 'Risk', label: 'simulation' },
 ];
 
 export default function ProjectSelector({ projects, onSelect, onGenerate, isGenerating }: ProjectSelectorProps) {
