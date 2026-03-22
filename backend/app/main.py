@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.routes import schedule, change_order, risk, export
+from app.routes import schedule, change_order, risk, export, chat
 
 app = FastAPI(
     title="Karmen Playground API",
@@ -26,6 +26,7 @@ app.include_router(schedule.router, prefix="/api")
 app.include_router(change_order.router, prefix="/api")
 app.include_router(risk.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
 
 
 @app.get("/health")

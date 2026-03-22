@@ -56,6 +56,69 @@ async def edit_schedule_nl(schedule_json: dict, instruction: str) -> dict:
     return extract_json(response.text)
 
 
+async def chat_with_schedule(schedule_json: dict, message: str, history: list) -> dict:
+    """
+    Handle a chat message in the context of a project schedule.
+    Returns {"type": "answer", "content": str} or {"type": "edit", "mutations": list, "summary": str}.
+    """
+    import json as _json
+
+    # Summarize the schedule to keep prompt size manageable
+    activities = schedule_json.get("activities", [])
+    critical_path = schedule_json.get("critical_path", [])
+    act_summary = "\n".join(
+        f"  {a['id']}: {a['name']} ({a['duration_days']}d)"
+        + (" [CRITICAL]" if a['id'] in critical_path else "")
+        for a in activities[:40]
+    )
+    if len(activities) > 40:
+        act_summary += f"\n  ... and {len(activities) - 40} more activities"
+
+    history_text = ""
+    for msg in history:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        history_text += f"\n{role.upper()}: {content}"
+
+    system_prompt = f"""You are a construction scheduling expert assistant with full context of the current project schedule.
+
+PROJECT: {schedule_json.get('name', 'Unknown')} ({schedule_json.get('project_type', 'construction')})
+START DATE: {schedule_json.get('start_date', 'N/A')}
+DURATION: {schedule_json.get('project_duration_days', 'N/A')} days
+ACTIVITIES ({len(activities)} total, {len(critical_path)} on critical path):
+{act_summary}
+CRITICAL PATH IDs: {', '.join(critical_path[:15])}{'...' if len(critical_path) > 15 else ''}
+
+INSTRUCTIONS:
+- If the user asks a QUESTION about the schedule, construction methods, sequencing, risks, dependencies, CPM concepts, or anything else — respond with a clear, helpful plain text answer.
+- If the user asks you to MODIFY the schedule (add/remove/change activities, adjust durations, add dependencies) — respond with a JSON mutations object.
+
+For questions: respond with EXACTLY this JSON:
+{{"type": "answer", "content": "your detailed answer here"}}
+
+For edits: respond with EXACTLY this JSON:
+{{"type": "edit", "summary": "what you changed", "mutations": [
+  {{"type": "modify_duration", "activity_id": "A001", "new_value": 10}},
+  {{"type": "add_activity", "activity": {{"id": "NEW1", "name": "New Task", "wbs_id": "1.1", "duration_days": 5, "predecessors": [{{"predecessor_id": "A001", "type": "FS", "lag_days": 0}}]}}}},
+  {{"type": "remove_activity", "activity_id": "A002"}},
+  {{"type": "add_dependency", "from_id": "A001", "to_id": "A003", "dep_type": "FS", "lag_days": 0}}
+]}}
+
+Respond ONLY with valid JSON. No markdown, no prose outside the JSON."""
+
+    contents = system_prompt
+    if history_text:
+        contents += f"\n\nCONVERSATION HISTORY:{history_text}"
+    contents += f"\n\nUSER: {message}"
+
+    response = client.models.generate_content(
+        model=FLASH_MODEL,
+        contents=contents,
+        config=types.GenerateContentConfig(temperature=0.3),
+    )
+    return extract_json(response.text)
+
+
 async def analyze_change_order_llm(
     schedule_json: dict, co_name: str, co_description: str, co_source: str
 ) -> dict:
