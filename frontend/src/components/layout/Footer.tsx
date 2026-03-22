@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-[var(--border-default)] py-6 px-6 mt-auto">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-4 text-sm text-[var(--text-muted)]">
           <span>Built by <a href="https://www.linkedin.com/in/rehanmollick/" target="_blank" rel="noopener noreferrer" className="text-[var(--text-link)] hover:underline">Rehan Mollick</a></span>
           <span>·</span>
