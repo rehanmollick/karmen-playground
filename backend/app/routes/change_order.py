@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request, Body
 from typing import List
 import json
 
-from app.models.change_order import ChangeOrder, ImpactAnalysis, Fragnet, ActivityDelta
+from app.models.change_order import ChangeOrder, ImpactAnalysis, Fragnet, ActivityDelta, DependencyLink
 from app.models.schedule import Activity, Dependency
 from app.services.fragnet_engine import apply_fragnet, compute_impact
 from app.services.project_store import get_project
@@ -106,7 +106,7 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
                 )
             )
         modified_acts = [ActivityDelta(**d) for d in fragnet_data.get("modified_activities", [])]
-        new_deps = [Dependency(**d) for d in fragnet_data.get("new_dependencies", [])]
+        new_deps = [DependencyLink(**d) for d in fragnet_data.get("new_dependencies", []) if "from_id" in d and "to_id" in d]
         fragnet = Fragnet(
             new_activities=new_acts,
             modified_activities=modified_acts,
@@ -170,7 +170,7 @@ async def analyze_custom_change_order(request: Request, body: dict = Body(...)):
             )
         )
     modified_acts = [ActivityDelta(**d) for d in fragnet_data.get("modified_activities", [])]
-    new_deps = [Dependency(**d) for d in fragnet_data.get("new_dependencies", [])]
+    new_deps = [DependencyLink(**d) for d in fragnet_data.get("new_dependencies", []) if "from_id" in d and "to_id" in d]
     fragnet = Fragnet(
         new_activities=new_acts,
         modified_activities=modified_acts,
