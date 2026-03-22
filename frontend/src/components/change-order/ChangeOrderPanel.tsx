@@ -20,8 +20,6 @@ interface CustomCO {
   isCustom: true;
 }
 
-type COItem = ChangeOrder | CustomCO;
-
 interface ChangeOrderPanelProps {
   changeOrders: ChangeOrder[];
   selectedId: string | null;
@@ -50,8 +48,6 @@ export default function ChangeOrderPanel({ changeOrders, selectedId, onSelect, o
     // Notify parent with id + full details so it can register and trigger analysis atomically
     onSubmitCustom?.(id, name, desc, customSource);
   }
-
-  const allCOs: COItem[] = [...changeOrders, ...customCOs];
 
   return (
     <div className="flex flex-col h-full">
