@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import type { ProjectSummary } from '../../types/schedule';
 
 interface ProjectSelectorProps {
@@ -12,33 +13,43 @@ interface ProjectSelectorProps {
 
 const PROJECT_ICONS = {
   residential: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 20L20 8L32 20V34H26V26H14V34H8V20Z" stroke="var(--blue-primary)" strokeWidth="1.5" fill="var(--blue-light)" />
-      <rect x="17" y="26" width="6" height="8" fill="var(--blue-primary)" />
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 24L24 8L40 24V42H32V32H16V42H8V24Z" stroke="var(--blue-primary)" strokeWidth="1.5" fill="var(--blue-light)" />
+      <rect x="20" y="32" width="8" height="10" fill="var(--blue-primary)" opacity="0.7" />
+      <rect x="10" y="26" width="6" height="5" fill="var(--blue-muted)" opacity="0.6" rx="1" />
+      <rect x="32" y="26" width="6" height="5" fill="var(--blue-muted)" opacity="0.6" rx="1" />
     </svg>
   ),
   commercial: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="8" y="10" width="24" height="24" stroke="var(--blue-primary)" strokeWidth="1.5" fill="var(--blue-light)" />
-      <line x1="14" y1="10" x2="14" y2="34" stroke="var(--blue-primary)" strokeWidth="0.75" />
-      <line x1="20" y1="10" x2="20" y2="34" stroke="var(--blue-primary)" strokeWidth="0.75" />
-      <line x1="26" y1="10" x2="26" y2="34" stroke="var(--blue-primary)" strokeWidth="0.75" />
-      <line x1="8" y1="17" x2="32" y2="17" stroke="var(--blue-primary)" strokeWidth="0.75" />
-      <line x1="8" y1="24" x2="32" y2="24" stroke="var(--blue-primary)" strokeWidth="0.75" />
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="10" width="32" height="32" stroke="var(--blue-primary)" strokeWidth="1.5" fill="var(--blue-light)" />
+      <line x1="18" y1="10" x2="18" y2="42" stroke="var(--blue-primary)" strokeWidth="0.75" />
+      <line x1="28" y1="10" x2="28" y2="42" stroke="var(--blue-primary)" strokeWidth="0.75" />
+      <line x1="8" y1="20" x2="40" y2="20" stroke="var(--blue-primary)" strokeWidth="0.75" />
+      <line x1="8" y1="30" x2="40" y2="30" stroke="var(--blue-primary)" strokeWidth="0.75" />
+      <rect x="20" y="32" width="8" height="10" fill="var(--blue-primary)" opacity="0.7" />
     </svg>
   ),
   infrastructure: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 28 Q10 16 20 16 Q30 16 36 28" stroke="var(--blue-primary)" strokeWidth="1.5" fill="none" />
-      <line x1="4" y1="28" x2="36" y2="28" stroke="var(--blue-primary)" strokeWidth="2" />
-      <line x1="14" y1="28" x2="14" y2="18" stroke="var(--blue-primary)" strokeWidth="1" />
-      <line x1="26" y1="28" x2="26" y2="18" stroke="var(--blue-primary)" strokeWidth="1" />
-      <rect x="2" y="27" width="36" height="4" fill="var(--blue-light)" />
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 36 Q12 20 24 20 Q36 20 44 36" stroke="var(--blue-primary)" strokeWidth="1.5" fill="none" />
+      <line x1="4" y1="36" x2="44" y2="36" stroke="var(--blue-primary)" strokeWidth="2.5" />
+      <line x1="16" y1="36" x2="16" y2="24" stroke="var(--blue-primary)" strokeWidth="1.25" />
+      <line x1="32" y1="36" x2="32" y2="24" stroke="var(--blue-primary)" strokeWidth="1.25" />
+      <rect x="2" y="35" width="44" height="5" fill="var(--blue-light)" rx="1" />
+      <line x1="24" y1="36" x2="24" y2="20" stroke="var(--blue-muted)" strokeWidth="1" strokeDasharray="2 2" />
     </svg>
   ),
 };
 
 const PROJECT_TYPES = ['residential', 'commercial', 'infrastructure', 'industrial', 'healthcare'];
+
+const STATS = [
+  { value: '3', label: 'sample projects' },
+  { value: '130+', label: 'activities' },
+  { value: 'Real', label: 'CPM engine' },
+  { value: '10K', label: 'Monte Carlo runs' },
+];
 
 export default function ProjectSelector({ projects, onSelect, onGenerate, isGenerating }: ProjectSelectorProps) {
   const [customScope, setCustomScope] = useState('');
@@ -51,32 +62,92 @@ export default function ProjectSelector({ projects, onSelect, onGenerate, isGene
   }
 
   return (
-    <div className="flex flex-col items-center py-16 px-6 max-w-4xl mx-auto w-full">
-      {/* Badge */}
-      <div className="mb-6">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[var(--accent-pink-light)] text-[var(--accent-pink)]">
-          AI Construction Scheduling
-        </span>
+    <div className="relative flex flex-col items-center py-16 px-6 max-w-4xl mx-auto w-full overflow-hidden">
+      {/* Subtle background geometry */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div
+          className="absolute -top-24 -right-32 w-96 h-96 rounded-full opacity-[0.035]"
+          style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute -bottom-16 -left-24 w-80 h-80 rounded-full opacity-[0.03]"
+          style={{ background: 'radial-gradient(circle, #2DD4BF 0%, transparent 70%)' }}
+        />
       </div>
 
+      {/* Badge row */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center gap-3 mb-6"
+      >
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--accent-pink-light)] text-[var(--accent-pink)]">
+          AI Construction Scheduling
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--blue-light)] text-[var(--blue-primary)] border border-[var(--blue-primary)] border-opacity-20">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--blue-primary)] animate-pulse" />
+          Live Demo
+        </span>
+      </motion.div>
+
       {/* Hero heading */}
-      <h1 className="text-5xl font-bold text-[var(--text-primary)] text-center leading-tight mb-4">
+      <motion.h1
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.05 }}
+        className="text-5xl font-bold text-[var(--text-primary)] text-center leading-tight mb-4"
+      >
         Karmen Playground
-      </h1>
-      <p className="text-lg text-[var(--text-secondary)] text-center mb-12 max-w-lg">
+      </motion.h1>
+      <motion.p
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.1 }}
+        className="text-lg text-[var(--text-secondary)] text-center mb-8 max-w-lg"
+      >
         An interactive demo of AI-powered construction scheduling. No signup. No sales call. Just build.
-      </p>
+      </motion.p>
+
+      {/* Stats strip */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="flex items-center gap-6 mb-10 text-center"
+      >
+        {STATS.map((stat, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {i > 0 && <div className="w-px h-4 bg-[var(--border-default)]" />}
+            <div>
+              <span className="font-semibold text-sm text-[var(--text-primary)]">{stat.value}</span>
+              <span className="text-sm text-[var(--text-muted)] ml-1">{stat.label}</span>
+            </div>
+          </div>
+        ))}
+      </motion.div>
 
       {/* Sample project cards */}
-      <div className="grid grid-cols-3 gap-4 w-full mb-10">
+      <motion.div
+        className="grid grid-cols-3 gap-4 w-full mb-10"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.08 } }, hidden: {} }}
+      >
         {projects.map((project) => {
           const iconKey = project.project_type as keyof typeof PROJECT_ICONS;
           return (
-            <button
+            <motion.button
               key={project.id}
+              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}
               onClick={() => onSelect(project.id)}
-              className="group relative bg-white border border-[var(--border-default)] rounded-[var(--radius-lg)] p-6 text-left transition-all hover:border-[var(--blue-primary)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02]"
+              className="group relative bg-white border border-[var(--border-default)] rounded-[var(--radius-lg)] p-6 text-left transition-all hover:border-[var(--blue-primary)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] overflow-hidden"
             >
+              {/* Top accent gradient bar */}
+              <div
+                className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-[var(--radius-lg)]"
+                style={{ background: 'linear-gradient(90deg, #3B82F6, #2DD4BF)' }}
+              />
               <div className="mb-4">{PROJECT_ICONS[iconKey] || PROJECT_ICONS.commercial}</div>
               <div className="font-semibold text-[var(--text-primary)] text-sm mb-1 leading-tight">{project.name}</div>
               <div className="text-xs text-[var(--text-muted)] font-mono">
@@ -85,20 +156,30 @@ export default function ProjectSelector({ projects, onSelect, onGenerate, isGene
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-xs text-[var(--blue-primary)] font-medium">Load →</span>
               </div>
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* Divider */}
-      <div className="flex items-center gap-4 w-full mb-8">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.35 }}
+        className="flex items-center gap-4 w-full mb-8"
+      >
         <div className="flex-1 h-px bg-[var(--border-default)]" />
         <span className="text-xs text-[var(--text-muted)] font-medium">OR GENERATE FROM SCOPE</span>
         <div className="flex-1 h-px bg-[var(--border-default)]" />
-      </div>
+      </motion.div>
 
       {/* Custom scope input */}
-      <div className="w-full max-w-2xl">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+        className="w-full max-w-2xl"
+      >
         <div className="flex gap-2 mb-3">
           <label className="text-xs font-medium text-[var(--text-secondary)]">Project type:</label>
           <div className="flex gap-2 flex-wrap">
@@ -143,7 +224,7 @@ export default function ProjectSelector({ projects, onSelect, onGenerate, isGene
             )}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
