@@ -61,10 +61,10 @@ export default function ProjectSelector({ projects, onSelect, onGenerate, isGene
 
       {/* Hero heading */}
       <h1 className="text-5xl font-bold text-[var(--text-primary)] text-center leading-tight mb-4">
-        Build your schedule<br />in seconds
+        Karmen Playground
       </h1>
       <p className="text-lg text-[var(--text-secondary)] text-center mb-12 max-w-lg">
-        Select a sample project or describe your own. AI generates a full CPM schedule with critical path analysis.
+        An interactive demo of AI-powered construction scheduling. No signup. No sales call. Just build.
       </p>
 
       {/* Sample project cards */}
