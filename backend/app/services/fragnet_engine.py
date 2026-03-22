@@ -22,12 +22,12 @@ def apply_fragnet(project: Project, fragnet: Fragnet) -> Project:
         if delta.activity_id in act_map:
             act_map[delta.activity_id].duration_days = delta.new_duration
 
-    # Add new dependencies
-    for dep in fragnet.new_dependencies:
-        if dep.predecessor_id in act_map:
-            # Find the activity this dep points TO and add it
-            # The dep object itself is a predecessor dep — we need to know which activity it belongs to
-            pass  # New deps handled via new_activity predecessors
+    # Add new dependencies between existing activities
+    for link in fragnet.new_dependencies:
+        if link.from_id in act_map and link.to_id in act_map:
+            act_map[link.to_id].predecessors.append(
+                Dependency(predecessor_id=link.from_id, type=link.type, lag_days=link.lag_days)
+            )
 
     # Remove dependencies
     removed_set = set(fragnet.removed_dependencies)

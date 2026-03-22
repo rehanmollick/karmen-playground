@@ -11,10 +11,18 @@ class ActivityDelta(BaseModel):
     reason: str
 
 
+class DependencyLink(BaseModel):
+    """A new dependency between two existing activities (from_id → to_id)."""
+    from_id: str
+    to_id: str
+    type: str = "FS"
+    lag_days: int = 0
+
+
 class Fragnet(BaseModel):
     new_activities: List[Activity] = []
     modified_activities: List[ActivityDelta] = []
-    new_dependencies: List[Dependency] = []
+    new_dependencies: List[DependencyLink] = []
     removed_dependencies: List[str] = []
 
 

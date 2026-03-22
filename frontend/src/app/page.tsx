@@ -152,6 +152,8 @@ export default function Home() {
       // If backend update fails, still update frontend state
     }
     overrideActiveProject({ ...modifiedProject, id: activeProject.id });
+    // Navigate to Schedule Builder so the user can see the updated schedule
+    handleTabChange('schedule');
   }
 
   function handleExport() {
