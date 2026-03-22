@@ -66,6 +66,10 @@ export default function Home() {
   const [coAnalysis, setCOAnalysis] = useState<AnalysisResult | null>(null);
   const [coAnalyzing, setCOAnalyzing] = useState(false);
   const [showImpacted, setShowImpacted] = useState(false);
+  // Cache analysis results so re-selecting a CO doesn't re-run the API call
+  const [coAnalysisCache, setCOAnalysisCache] = useState<Record<string, AnalysisResult>>({});
+  // Track which CO IDs have been applied to the schedule
+  const [appliedCOIds, setAppliedCOIds] = useState<Set<string>>(new Set());
 
   // Load projects on mount
   useEffect(() => {
@@ -82,6 +86,8 @@ export default function Home() {
     setCOAnalysis(null);
     setSelectedCOId(null);
     setShowImpacted(false);
+    setCOAnalysisCache({});
+    setAppliedCOIds(new Set());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProject?.id, loadRiskDefaults]);
 
@@ -91,22 +97,29 @@ export default function Home() {
   const handleSelectCO = useCallback(async (coId: string) => {
     if (!activeProject) return;
     setSelectedCOId(coId);
+    setShowImpacted(false);
+
+    // Use cached result if available — no re-analysis needed
+    if (coAnalysisCache[coId]) {
+      setCOAnalysis(coAnalysisCache[coId]);
+      return;
+    }
+
     setCOAnalyzing(true);
     setCOAnalysis(null);
-    setShowImpacted(false);
     try {
-      // If it's a custom CO, use the custom endpoint
       const customData = customCOMap[coId];
       const result = customData
         ? await api.analyzeCustomChangeOrder(activeProject.id, customData.name, customData.description, customData.source) as AnalysisResult
         : await api.analyzeChangeOrder(activeProject.id, coId) as AnalysisResult;
       setCOAnalysis(result);
+      setCOAnalysisCache((prev) => ({ ...prev, [coId]: result }));
     } catch {
       setCOAnalysis(null);
     } finally {
       setCOAnalyzing(false);
     }
-  }, [activeProject, customCOMap]);
+  }, [activeProject, customCOMap, coAnalysisCache]);
 
   const handleSubmitCustomCO = useCallback(async (id: string, name: string, description: string, source: string) => {
     if (!activeProject) return;
@@ -120,6 +133,7 @@ export default function Home() {
       const result = await api.analyzeCustomChangeOrder(activeProject.id, name, description, source) as AnalysisResult;
       if (result?.impact && result?.modified_project) {
         setCOAnalysis(result);
+        setCOAnalysisCache((prev) => ({ ...prev, [id]: result }));
       } else {
         setCOAnalysis(null);
       }
@@ -141,17 +155,20 @@ export default function Home() {
     setSelectedCOId(null);
     setShowImpacted(false);
     setChangeOrders([]);
+    setCOAnalysisCache({});
+    setAppliedCOIds(new Set());
     setActiveTab('schedule');
   }
 
   async function handleApplyCO(modifiedProject: Project) {
-    if (!activeProject) return;
+    if (!activeProject || !selectedCOId) return;
     try {
       await api.updateProject(activeProject.id, modifiedProject);
     } catch {
       // If backend update fails, still update frontend state
     }
     overrideActiveProject({ ...modifiedProject, id: activeProject.id });
+    setAppliedCOIds((prev) => new Set(prev).add(selectedCOId));
     // Navigate to Schedule Builder so the user can see the updated schedule
     handleTabChange('schedule');
   }
@@ -331,6 +348,7 @@ export default function Home() {
                       changeOrders={changeOrders}
                       customCOs={customCOList}
                       selectedId={selectedCOId}
+                      appliedIds={appliedCOIds}
                       onSelect={handleSelectCO}
                       onSubmitCustom={handleSubmitCustomCO}
                       isAnalyzing={coAnalyzing}
@@ -376,6 +394,7 @@ export default function Home() {
                             projectId={activeProject.id}
                             modifiedProject={coAnalysis.modified_project}
                             onApplyChanges={handleApplyCO}
+                            isApplied={selectedCOId ? appliedCOIds.has(selectedCOId) : false}
                           />
                         </div>
                       </div>

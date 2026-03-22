@@ -11,17 +11,16 @@ interface ImpactNarrativeProps {
   projectId?: string;
   modifiedProject?: Project;
   onApplyChanges?: (modifiedProject: Project) => void;
+  isApplied?: boolean;
 }
 
-export default function ImpactNarrative({ impact, changeOrderName, projectId, modifiedProject, onApplyChanges }: ImpactNarrativeProps) {
+export default function ImpactNarrative({ impact, changeOrderName, projectId, modifiedProject, onApplyChanges, isApplied = false }: ImpactNarrativeProps) {
   const [copied, setCopied] = useState(false);
-  const [applied, setApplied] = useState(false);
   const [view, setView] = useState<'narrative' | 'fragnet' | 'impact'>('impact');
 
   function handleApply() {
-    if (!modifiedProject || !onApplyChanges) return;
+    if (!modifiedProject || !onApplyChanges || isApplied) return;
     onApplyChanges(modifiedProject);
-    setApplied(true);
   }
 
   const delaySign = impact.delay_days >= 0 ? '+' : '';
@@ -130,10 +129,10 @@ export default function ImpactNarrative({ impact, changeOrderName, projectId, mo
             {/* Apply to schedule */}
             {onApplyChanges && modifiedProject && (
               <div className="pt-1">
-                {applied ? (
+                {isApplied ? (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-sm)] bg-green-50 border border-green-200 text-xs text-green-700">
                     <span>✓</span>
-                    <span>Changes applied. Schedule Builder now shows the updated schedule.</span>
+                    <span>Applied to schedule. View the updated Gantt in Schedule Builder.</span>
                   </div>
                 ) : (
                   <button
