@@ -47,6 +47,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(config),
     }),
+  updateProject: (projectId: string, projectData: unknown) =>
+    apiFetch(`/api/projects/${projectId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(projectData),
+    }),
   analyzeCustomChangeOrder: (projectId: string, name: string, description: string, source: string) =>
     apiFetch('/api/change-order/custom', {
       method: 'POST',

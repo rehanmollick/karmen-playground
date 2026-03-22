@@ -21,6 +21,7 @@ import { useSchedule } from '../hooks/useSchedule';
 import { useSimulation } from '../hooks/useSimulation';
 import { api } from '../lib/api';
 import type { ChangeOrder, AnalysisResult } from '../types/changeOrder';
+import type { Project } from '../types/schedule';
 import type { UncertaintyRange } from '../types/risk';
 
 const tabOrder: TabId[] = ['schedule', 'change-orders', 'risk'];
@@ -43,6 +44,7 @@ export default function Home() {
     generateSchedule,
     refreshProject,
     clearProject,
+    overrideActiveProject,
   } = useSchedule();
 
   const {
@@ -139,6 +141,16 @@ export default function Home() {
     setShowImpacted(false);
     setChangeOrders([]);
     setActiveTab('schedule');
+  }
+
+  async function handleApplyCO(modifiedProject: Project) {
+    if (!activeProject) return;
+    try {
+      await api.updateProject(activeProject.id, modifiedProject);
+    } catch {
+      // If backend update fails, still update frontend state
+    }
+    overrideActiveProject({ ...modifiedProject, id: activeProject.id });
   }
 
   function handleExport() {
@@ -356,6 +368,8 @@ export default function Home() {
                             impact={coAnalysis.impact}
                             changeOrderName={selectedCO.name}
                             projectId={activeProject.id}
+                            modifiedProject={coAnalysis.modified_project}
+                            onApplyChanges={handleApplyCO}
                           />
                         </div>
                       </div>

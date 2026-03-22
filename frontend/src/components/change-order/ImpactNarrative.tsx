@@ -2,17 +2,27 @@
 
 import { useState } from 'react';
 import type { ImpactAnalysis } from '../../types/changeOrder';
+import type { Project } from '../../types/schedule';
 import { formatDate } from '../../lib/formatters';
 
 interface ImpactNarrativeProps {
   impact: ImpactAnalysis;
   changeOrderName: string;
   projectId?: string;
+  modifiedProject?: Project;
+  onApplyChanges?: (modifiedProject: Project) => void;
 }
 
-export default function ImpactNarrative({ impact, changeOrderName, projectId }: ImpactNarrativeProps) {
+export default function ImpactNarrative({ impact, changeOrderName, projectId, modifiedProject, onApplyChanges }: ImpactNarrativeProps) {
   const [copied, setCopied] = useState(false);
+  const [applied, setApplied] = useState(false);
   const [view, setView] = useState<'narrative' | 'fragnet' | 'impact'>('impact');
+
+  function handleApply() {
+    if (!modifiedProject || !onApplyChanges) return;
+    onApplyChanges(modifiedProject);
+    setApplied(true);
+  }
 
   const delaySign = impact.delay_days >= 0 ? '+' : '';
 
@@ -114,6 +124,28 @@ export default function ImpactNarrative({ impact, changeOrderName, projectId }: 
                     <span className="text-[10px] text-[var(--text-muted)]">+{impact.new_critical_path.length - 8} more</span>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Apply to schedule */}
+            {onApplyChanges && modifiedProject && (
+              <div className="pt-1">
+                {applied ? (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-sm)] bg-green-50 border border-green-200 text-xs text-green-700">
+                    <span>✓</span>
+                    <span>Changes applied. Schedule Builder now shows the updated schedule.</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleApply}
+                    className="w-full py-2.5 text-sm font-medium text-white rounded-[var(--radius-md)] transition-all"
+                    style={{ backgroundColor: 'var(--blue-primary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--blue-hover)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blue-primary)')}
+                  >
+                    Apply Changes to Schedule
+                  </button>
+                )}
               </div>
             )}
           </div>

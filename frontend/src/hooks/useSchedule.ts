@@ -63,6 +63,10 @@ export function useSchedule() {
     setError(null);
   }, []);
 
+  const overrideActiveProject = useCallback((project: Project) => {
+    setActiveProject(project);
+  }, []);
+
   return {
     projects,
     activeProject,
@@ -74,5 +78,6 @@ export function useSchedule() {
     generateSchedule,
     refreshProject,
     clearProject,
+    overrideActiveProject,
   };
 }
