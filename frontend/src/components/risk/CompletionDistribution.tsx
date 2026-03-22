@@ -35,7 +35,7 @@ export default function CompletionDistribution({ result }: CompletionDistributio
   return (
     <div className="w-full h-full">
       <div className="flex items-center gap-4 mb-3">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Completion Distribution</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">When could this project actually finish?</h3>
         <div className="flex items-center gap-3 text-[10px] text-[var(--text-muted)]">
           {refLines.map((r) => (
             <span key={r.label} className="flex items-center gap-1">
@@ -71,7 +71,7 @@ export default function CompletionDistribution({ result }: CompletionDistributio
               padding: '6px 10px',
             }}
             formatter={(value, name) => {
-              if (name === 'count') return [value, 'Simulations'];
+              if (name === 'count') return [value, 'Scenarios finishing this week'];
               return [String(value) + '%', 'Cumulative'];
             }}
           />
