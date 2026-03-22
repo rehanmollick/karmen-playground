@@ -35,7 +35,7 @@ export default function TornadoChart({ sensitivity }: TornadoChartProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Sensitivity (Spearman Correlation)</h3>
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Which tasks drive the most risk?</h3>
       <ResponsiveContainer width="100%" height={Math.max(data.length * 28 + 40, 200)}>
         <BarChart
           data={data}
