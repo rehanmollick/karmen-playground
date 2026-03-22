@@ -47,6 +47,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(config),
     }),
+  analyzeCustomChangeOrder: (projectId: string, name: string, description: string, source: string) =>
+    apiFetch('/api/change-order/custom', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: projectId, name, description, source }),
+    }),
   chat: (projectId: string, message: string, history: Array<{ role: string; content: string }>) =>
     apiFetch('/api/chat', {
       method: 'POST',
