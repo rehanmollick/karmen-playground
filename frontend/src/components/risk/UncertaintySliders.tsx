@@ -218,7 +218,7 @@ export default function UncertaintySliders({
                 >
                   <div className="flex-1 h-px bg-[var(--border-default)]" />
                   <span className="whitespace-nowrap">
-                    {showNonCritical ? '▲' : '▼'} {nonCriticalRanges.length} other tasks — won't shift the end date
+                    {showNonCritical ? '▲' : '▼'} {nonCriticalRanges.length} other tasks &mdash; won&apos;t shift the end date
                   </span>
                   <div className="flex-1 h-px bg-[var(--border-default)]" />
                 </button>
