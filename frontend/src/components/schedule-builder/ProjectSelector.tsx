@@ -251,16 +251,6 @@ export default function ProjectSelector({
       {/* CPM network background */}
       <AnimatedNetworkBackground />
 
-      {/* Noise texture overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[1]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '256px 256px',
-        }}
-      />
-
       {/* Ambient radial glow behind heading */}
       <div
         className="absolute pointer-events-none z-[2]"
@@ -313,6 +303,7 @@ export default function ProjectSelector({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.35, ease: heroEase }}
           className="text-[18px] text-[var(--text-secondary)] text-center leading-relaxed max-w-lg"
+          style={{ textWrap: 'balance' } as React.CSSProperties}
         >
           AI-powered CPM scheduling, change order analysis, and
           Monte Carlo risk simulation for construction.
