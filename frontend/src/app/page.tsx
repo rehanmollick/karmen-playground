@@ -9,7 +9,7 @@ import ProjectSelector from '../components/schedule-builder/ProjectSelector';
 import ActivityTable from '../components/schedule-builder/ActivityTable';
 import GanttChart from '../components/gantt/GanttChart';
 import ChatPanel from '../components/chat/ChatPanel';
-import ChangeOrderPanel from '../components/change-order/ChangeOrderPanel';
+import ChangeOrderPanel, { type CustomCO } from '../components/change-order/ChangeOrderPanel';
 import ImpactNarrative from '../components/change-order/ImpactNarrative';
 import BeforeAfterToggle from '../components/change-order/BeforeAfterToggle';
 import UncertaintySliders from '../components/risk/UncertaintySliders';
@@ -85,8 +85,8 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProject?.id, loadRiskDefaults]);
 
-  // Map from custom CO id -> {name, description, source} for re-running analysis
-  const [customCOMap, setCustomCOMap] = useState<Record<string, { name: string; description: string; source: string }>>({});
+  // Map from custom CO id -> CustomCO data (persists across tab switches)
+  const [customCOMap, setCustomCOMap] = useState<Record<string, Omit<CustomCO, 'id'>>>({});
 
   const handleSelectCO = useCallback(async (coId: string) => {
     if (!activeProject) return;
@@ -184,6 +184,8 @@ export default function Home() {
   const displayProject = showImpacted && coAnalysis
     ? coAnalysis.modified_project
     : activeProject;
+
+  const customCOList = Object.entries(customCOMap).map(([id, data]) => ({ id, ...data }));
 
   const selectedCO = changeOrders.find((co) => co.id === selectedCOId)
     ?? (selectedCOId && customCOMap[selectedCOId]
@@ -327,6 +329,7 @@ export default function Home() {
                   <div className="w-72 border-r border-[var(--border-default)] overflow-y-auto flex-shrink-0">
                     <ChangeOrderPanel
                       changeOrders={changeOrders}
+                      customCOs={customCOList}
                       selectedId={selectedCOId}
                       onSelect={handleSelectCO}
                       onSubmitCustom={handleSubmitCustomCO}
