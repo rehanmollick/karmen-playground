@@ -9,14 +9,23 @@ interface NavbarProps {
 export default function Navbar({ onExport, showExport = false, onGoHome }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-[var(--border-default)] h-14 flex items-center px-6">
-      <div
-        className={`flex items-center gap-1 flex-1 ${onGoHome ? 'cursor-pointer' : ''}`}
-        onClick={onGoHome}
-        title={onGoHome ? 'Back to projects' : undefined}
-      >
-        <span className="font-bold text-base leading-none" style={{ color: '#2DD4BF' }}>✕</span>
-        <span className="font-bold text-[var(--text-primary)] text-base tracking-tight ml-1">KARMEN</span>
-        <span className="font-normal text-[var(--text-primary)] text-base tracking-tight">PLAYGROUND</span>
+      <div className="flex items-center gap-4 flex-1">
+        <div className="flex items-center gap-1">
+          <span className="font-bold text-base leading-none" style={{ color: '#2DD4BF' }}>✕</span>
+          <span className="font-bold text-[var(--text-primary)] text-base tracking-tight ml-1">KARMEN</span>
+          <span className="font-normal text-[var(--text-primary)] text-base tracking-tight">PLAYGROUND</span>
+        </div>
+        {onGoHome && (
+          <>
+            <span className="text-[var(--border-strong)] text-sm">/</span>
+            <button
+              onClick={onGoHome}
+              className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--blue-primary)] transition-colors"
+            >
+              ← Back to projects
+            </button>
+          </>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
