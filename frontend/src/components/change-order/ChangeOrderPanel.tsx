@@ -12,16 +12,16 @@ const SOURCE_COLORS: Record<string, string> = {
 
 const SOURCE_OPTIONS = ['Owner Directive', 'Field Condition', 'Design Error'];
 
-interface CustomCO {
+export interface CustomCO {
   id: string;
   name: string;
   description: string;
   source: string;
-  isCustom: true;
 }
 
 interface ChangeOrderPanelProps {
   changeOrders: ChangeOrder[];
+  customCOs: CustomCO[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   /** Called when user submits a custom CO. Parent should register the CO and trigger analysis. */
@@ -29,8 +29,7 @@ interface ChangeOrderPanelProps {
   isAnalyzing?: boolean;
 }
 
-export default function ChangeOrderPanel({ changeOrders, selectedId, onSelect, onSubmitCustom, isAnalyzing }: ChangeOrderPanelProps) {
-  const [customCOs, setCustomCOs] = useState<CustomCO[]>([]);
+export default function ChangeOrderPanel({ changeOrders, customCOs, selectedId, onSelect, onSubmitCustom, isAnalyzing }: ChangeOrderPanelProps) {
   const [customName, setCustomName] = useState('');
   const [customDesc, setCustomDesc] = useState('');
   const [customSource, setCustomSource] = useState('Owner Directive');
@@ -41,8 +40,6 @@ export default function ChangeOrderPanel({ changeOrders, selectedId, onSelect, o
     if (!desc) return;
 
     const id = `custom_${Date.now()}`;
-    const newCO: CustomCO = { id, name, description: desc, source: customSource, isCustom: true };
-    setCustomCOs((prev) => [...prev, newCO]);
     setCustomDesc('');
     setCustomName('');
     // Notify parent with id + full details so it can register and trigger analysis atomically
