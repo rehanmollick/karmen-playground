@@ -121,7 +121,7 @@ Each project includes 3 pre-loaded change orders with realistic fragnet data.
 
 ## Disclaimer
 
-This is a portfolio demo project. It is not affiliated with, endorsed by, or connected to Karmen in any way. AI-generated schedules are for demonstration purposes only and should not be used for actual construction project planning.
+This is a portfolio demo project. It is not affiliated with, endorsed by, or connected to Karmen in any way. These schedules are for demonstration purposes only.
 
 ---
 
