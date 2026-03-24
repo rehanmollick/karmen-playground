@@ -10,7 +10,7 @@
 
 
 <p align="center">
-      Built as a portfolio piece for the <a href="https://karmen.ai](https://www.karmenai.com/">Karmen</a> founding team (YC F24).
+      Built as a portfolio piece for the Karmen (https://www.karmenai.com/) founding team (YC F24).
 </p>
 
 
