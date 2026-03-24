@@ -1,6 +1,6 @@
 <p align="center">
-  An interactive, zero-sign-up demo of AI-powered construction scheduling.<br/>
-  Select a project and the full demo is live in seconds.
+  An interactive demo of an AI-powered construction scheduler.<br/>
+  Select a project or scope your own to demo the product. 
 </p>
 
 <p align="center">
