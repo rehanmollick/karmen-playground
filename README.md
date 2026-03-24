@@ -3,18 +3,15 @@
   Start by going to this <strong><a href="https://karmen-playground.vercel.app">Live Demo</a></strong>.
 </p>
 
-<p align="center">
-   Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
-</p>
-
-
-
 
 <p align="center">
   <img src="assets/hero-screenshot.png" alt="Karmen Playground" width="100%" />
 </p>
 
 
+<p align="center">
+   Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
+</p>
 
 
 
