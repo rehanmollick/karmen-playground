@@ -1,10 +1,15 @@
-# Karmen Playground
+<p align="center">
+  <img src="assets/hero-screenshot.png" alt="Karmen Playground" width="100%" />
+</p>
 
-An interactive, zero-sign-up demo of AI-powered construction scheduling. Select a project and the full demo is live in seconds.
+<p align="center">
+  An interactive, zero-sign-up demo of AI-powered construction scheduling.<br/>
+  Select a project and the full demo is live in seconds.
+</p>
 
-Built as a portfolio piece for the [Karmen](https://karmen.ai) founding team (YC F24).
-
-**[View Live Demo](https://karmen-playground.vercel.app)**
+<p align="center">
+  <strong><a href="https://karmen-playground.vercel.app">View Live Demo</a></strong> · Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
+</p>
 
 ---
 
