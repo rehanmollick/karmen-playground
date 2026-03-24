@@ -3,13 +3,15 @@
 </p>
 
 <p align="center">
+  <strong><a href="https://karmen-playground.vercel.app">View Live Demo</a></strong> · Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
+</p>
+
+<p align="center">
   An interactive, zero-sign-up demo of AI-powered construction scheduling.<br/>
   Select a project and the full demo is live in seconds.
 </p>
 
-<p align="center">
-  <strong><a href="https://karmen-playground.vercel.app">View Live Demo</a></strong> · Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
-</p>
+
 
 ---
 
