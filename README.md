@@ -21,12 +21,15 @@
 ## What It Does
 
 > **Schedule Builder** -- Type what you're building and AI will creates your full project schedule + you can edit easily it via a chat assistant. 
+
 Describe your scope in plain text, get back a complete CPM schedule with activities, dependencies, and a Gantt chart. Then edit it by chatting naturally ("push drywall back two weeks", "add concrete curing after foundations") and watch the schedule recompute live. Critical path highlighting, dependency arrows, and interactive tooltips included.
 
 > **Change Order Simulator** -- Pick a change order and instantly see how it affects your schedule. 
+
 The engine clones the original schedule, applies the change (new tasks, shifted durations, updated dependencies), recalculates all dates, and shows you the difference. An animated before/after Gantt comparison highlights exactly what moved, with an AI-written impact summary explaining the delay in plain English.
 
 > **Risk Analysis Dashboard** -- Find out how likely your project is to finish on time via Monte Carlo simulations. 
+
 Runs 10,000 simulated schedule outcomes using statistical distributions (PERT Beta) for every activity. Shows you P50, P80, and P95 confidence dates ("50% chance of finishing by X"), a probability histogram, and a tornado chart ranking which activities have the biggest impact on your finish date.
 
 ---
