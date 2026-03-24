@@ -10,14 +10,11 @@ Built as a portfolio piece for the [Karmen](https://karmen.ai) founding team (YC
 
 ## What It Does
 
-### Schedule Builder
-AI generates a full CPM schedule from plain-text scope descriptions. Edit activities through natural language chat ("push drywall back two weeks", "add a concrete curing task after foundations") and watch the Gantt chart update in real time. Critical path highlighting, dependency arrows, and interactive tooltips included.
+> **Schedule Builder** -- Describe your project scope in plain text. AI generates a full CPM schedule with activities, dependencies, and a Gantt chart. Edit it with natural language ("push drywall back two weeks", "add concrete curing after foundations") and the schedule recomputes live. Critical path highlighting, dependency arrows, and interactive tooltips included.
 
-### Change Order Simulator
-Select a pre-built change order and instantly see its impact. The engine deep-copies the schedule, inserts the fragnet (new activities, modified durations, shifted dependencies), re-runs CPM, and computes the delta. An animated before/after Gantt comparison shows exactly what changed, with an LLM-generated impact narrative explaining the delay in plain English.
+> **Change Order Simulator** -- Select a change order and instantly see the ripple effect. The engine deep-copies the schedule, injects the fragnet (new activities, modified durations, shifted dependencies), re-runs CPM, and surfaces the delta. An animated before/after Gantt comparison shows exactly what moved, paired with an LLM-generated impact narrative explaining the delay in plain English.
 
-### Risk Analysis Dashboard
-The headline feature. Run a 10,000-iteration Monte Carlo simulation using PERT Beta distributions across every activity. Get P50, P80, and P95 completion confidence dates, a probability histogram, and a Spearman correlation tornado chart that ranks which activities drive the most schedule risk.
+> **Risk Analysis Dashboard** -- The headline feature. 10,000-iteration Monte Carlo simulation with PERT Beta distributions across every activity. P50/P80/P95 completion confidence dates, a probability histogram, and a Spearman correlation tornado chart ranking which activities drive the most schedule risk.
 
 ---
 
