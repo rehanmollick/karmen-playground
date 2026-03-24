@@ -20,11 +20,11 @@
 
 ## What It Does
 
-> **Schedule Builder** -- Describe your project scope in plain text. AI generates a full CPM schedule with activities, dependencies, and a Gantt chart. Edit it with natural language ("push drywall back two weeks", "add concrete curing after foundations") and the schedule recomputes live. Critical path highlighting, dependency arrows, and interactive tooltips included.
+> **Schedule Builder** -- Type what you're building and AI creates your full project schedule. Describe your scope in plain text, get back a complete CPM schedule with activities, dependencies, and a Gantt chart. Then edit it by chatting naturally ("push drywall back two weeks", "add concrete curing after foundations") and watch the schedule recompute live. Critical path highlighting, dependency arrows, and interactive tooltips included.
 
-> **Change Order Simulator** -- Select a change order and instantly see the ripple effect. The engine deep-copies the schedule, injects the fragnet (new activities, modified durations, shifted dependencies), re-runs CPM, and surfaces the delta. An animated before/after Gantt comparison shows exactly what moved, paired with an LLM-generated impact narrative explaining the delay in plain English.
+> **Change Order Simulator** -- Pick a change order and instantly see how it ripples through your schedule. The engine clones the original schedule, applies the change (new tasks, shifted durations, updated dependencies), recalculates all dates, and shows you the difference. An animated before/after Gantt comparison highlights exactly what moved, with an AI-written impact summary explaining the delay in plain English.
 
-> **Risk Analysis Dashboard** -- The headline feature. 10,000-iteration Monte Carlo simulation with PERT Beta distributions across every activity. P50/P80/P95 completion confidence dates, a probability histogram, and a Spearman correlation tornado chart ranking which activities drive the most schedule risk.
+> **Risk Analysis Dashboard** -- Find out how likely your project is to finish on time. Runs 10,000 simulated schedule outcomes using statistical distributions (PERT Beta) for every activity. Shows you P50, P80, and P95 confidence dates ("50% chance of finishing by X"), a probability histogram, and a tornado chart ranking which activities have the biggest impact on your finish date.
 
 ---
 
