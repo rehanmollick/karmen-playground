@@ -20,6 +20,7 @@ import RiskNarrative from '../components/risk/RiskNarrative';
 import LoadingAnimation from '../components/shared/LoadingAnimation';
 import { useSchedule } from '../hooks/useSchedule';
 import { useSimulation } from '../hooks/useSimulation';
+import { useResizable } from '../hooks/useResizable';
 import { api } from '../lib/api';
 import type { ChangeOrder, AnalysisResult } from '../types/changeOrder';
 import type { Project } from '../types/schedule';
@@ -178,6 +179,10 @@ export default function Home() {
     window.open(api.exportXmlUrl(activeProject.id), '_blank');
   }
 
+  // Resizable panels for Schedule Builder
+  const hSplit = useResizable({ direction: 'horizontal', initialSize: 45, minSize: 25, maxSize: 65 });
+  const vSplit = useResizable({ direction: 'vertical', initialSize: 65, minSize: 30, maxSize: 85 });
+
   const riskScrollRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top so stat boxes are fully visible when results load
@@ -281,22 +286,14 @@ export default function Home() {
                   exit="exit"
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="absolute inset-0 flex"
+                  ref={hSplit.containerRef}
                 >
                   {/* Left: Activity Table */}
-                  <div className="w-[45%] border-r border-[var(--border-default)] flex flex-col min-h-0">
+                  <div className="flex flex-col min-h-0" style={{ width: `${hSplit.size}%` }}>
                     <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={clearProject}
-                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
-                        >
-                          ← Projects
-                        </button>
-                        <span className="text-[var(--border-default)]">/</span>
-                        <span className="text-xs font-semibold text-[var(--text-primary)] truncate max-w-[180px]">
-                          {activeProject.name}
-                        </span>
-                      </div>
+                      <span className="text-xs font-semibold text-[var(--text-primary)] truncate max-w-[240px]">
+                        {activeProject.name}
+                      </span>
                       <span className="text-xs font-mono text-[var(--text-muted)]">
                         {activeProject.project_duration_days}d
                       </span>
@@ -310,12 +307,41 @@ export default function Home() {
                     </div>
                   </div>
 
+                  {/* Vertical resize handle */}
+                  <div
+                    onMouseDown={hSplit.onMouseDown}
+                    className="w-1.5 flex-shrink-0 cursor-col-resize relative group z-10 hover:bg-[var(--blue-primary)]/10 active:bg-[var(--blue-primary)]/15 transition-colors"
+                  >
+                    <div className="absolute inset-y-0 left-0 w-px bg-[var(--border-default)] group-hover:bg-[var(--blue-primary)] group-active:bg-[var(--blue-primary)] transition-colors" />
+                    {/* Grip dots */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-60 transition-opacity">
+                      <div className="w-0.5 h-0.5 rounded-full bg-[var(--text-muted)]" />
+                      <div className="w-0.5 h-0.5 rounded-full bg-[var(--text-muted)]" />
+                      <div className="w-0.5 h-0.5 rounded-full bg-[var(--text-muted)]" />
+                    </div>
+                  </div>
+
                   {/* Right: Gantt + Chat */}
-                  <div className="flex-1 flex flex-col min-h-0 min-w-0">
-                    <div className="flex-1 min-h-0 overflow-hidden">
+                  <div className="flex-1 flex flex-col min-h-0 min-w-0" ref={vSplit.containerRef}>
+                    <div className="min-h-0 overflow-hidden" style={{ height: `${vSplit.size}%` }}>
                       <GanttChart project={activeProject} highlightedId={highlightedActivityId} />
                     </div>
-                    <div className="border-t border-[var(--border-default)]" style={{ height: 260, flexShrink: 0 }}>
+
+                    {/* Horizontal resize handle */}
+                    <div
+                      onMouseDown={vSplit.onMouseDown}
+                      className="h-1.5 flex-shrink-0 cursor-row-resize relative group z-10 hover:bg-[var(--blue-primary)]/10 active:bg-[var(--blue-primary)]/15 transition-colors"
+                    >
+                      <div className="absolute inset-x-0 top-0 h-px bg-[var(--border-default)] group-hover:bg-[var(--blue-primary)] group-active:bg-[var(--blue-primary)] transition-colors" />
+                      {/* Grip dots */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-60 transition-opacity">
+                        <div className="w-0.5 h-0.5 rounded-full bg-[var(--text-muted)]" />
+                        <div className="w-0.5 h-0.5 rounded-full bg-[var(--text-muted)]" />
+                        <div className="w-0.5 h-0.5 rounded-full bg-[var(--text-muted)]" />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-h-0 overflow-hidden">
                       <div className="grid grid-cols-2 gap-4 h-full p-3">
                         <div className="bg-[var(--bg-secondary)] rounded-[var(--radius-md)] p-3 overflow-auto text-xs text-[var(--text-muted)]">
                           <div className="font-medium text-[var(--text-secondary)] mb-2">Project Overview</div>

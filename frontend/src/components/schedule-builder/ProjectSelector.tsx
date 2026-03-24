@@ -261,19 +261,34 @@ export default function ProjectSelector({
 
   // ─── Typing demo state ──────────────────────────────────────────────────
   const [demoText, setDemoText] = useState('');
-  const [demoActive, setDemoActive] = useState(true);
+  const [demoActive, setDemoActive] = useState(false); // starts false, activated by IntersectionObserver
   const [cursorVisible, setCursorVisible] = useState(true);
-  const isFirstRun = useRef(true);
+  const hasBeenVisible = useRef(false);
+  const scopeSectionRef = useRef<HTMLDivElement>(null);
+
+  // Start typing only when the scope section scrolls into view
+  useEffect(() => {
+    const el = scopeSectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasBeenVisible.current) {
+          hasBeenVisible.current = true;
+          setDemoActive(true);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!demoActive) return;
 
     let charIdx = 0;
     let interval: ReturnType<typeof setInterval>;
-
-    // First load: wait for entrance animations. Refocus: shorter delay.
-    const delay = isFirstRun.current ? 2500 : 600;
-    isFirstRun.current = false;
 
     const timeout = setTimeout(() => {
       interval = setInterval(() => {
@@ -284,7 +299,7 @@ export default function ProjectSelector({
           clearInterval(interval);
         }
       }, 45);
-    }, delay);
+    }, 400);
 
     return () => {
       clearTimeout(timeout);
@@ -304,7 +319,7 @@ export default function ProjectSelector({
   }
 
   function handleTextareaBlur() {
-    if (!customScope) {
+    if (!customScope && hasBeenVisible.current) {
       setDemoActive(true);
     }
   }
@@ -314,48 +329,45 @@ export default function ProjectSelector({
   }
 
   return (
-    <div>
+    <div className="relative overflow-hidden">
+      {/* Dot grid background — gradient matches "in seconds" text */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: 'linear-gradient(135deg, #3B82F6 0%, #2DD4BF 100%)',
+          backgroundSize: '100% 100%',
+          maskImage: 'radial-gradient(circle, black 1px, transparent 1px), radial-gradient(ellipse 60% 50% at 50% 40%, transparent 30%, rgba(0,0,0,0.3) 60%, black 100%), radial-gradient(ellipse 55% 18% at 50% 62%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%), radial-gradient(ellipse 40% 20% at 50% 88%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%)',
+          maskSize: '12px 12px, 100% 100%, 100% 100%, 100% 100%',
+          maskPosition: '0 -5.65px, 0 0, 0 0, 0 0',
+          maskComposite: 'intersect',
+          WebkitMaskImage: 'radial-gradient(circle, black 1px, transparent 1px), radial-gradient(ellipse 60% 50% at 50% 40%, transparent 30%, rgba(0,0,0,0.3) 60%, black 100%), radial-gradient(ellipse 55% 18% at 50% 62%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%), radial-gradient(ellipse 40% 20% at 50% 88%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%)',
+          WebkitMaskSize: '12px 12px, 100% 100%, 100% 100%, 100% 100%',
+          WebkitMaskPosition: '0 -5.65px, 0 0, 0 0, 0 0',
+          WebkitMaskComposite: 'destination-in',
+        }}
+      />
+
       {/* ─── Hero Section: Split Layout ─── */}
-      <section className="max-w-[1200px] mx-auto px-8 pt-16 pb-20">
+      <section className="relative max-w-[1200px] mx-auto px-8 pt-16 pb-20">
         <div className="grid grid-cols-1 xl:grid-cols-[1fr,1.2fr] gap-12 xl:gap-16 items-center">
           {/* Left: Copy */}
           <div className="text-center xl:text-left">
-            {/* Pink badge */}
-            <motion.div
-              initial={prefersReduced ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.05, ease: EASE }}
-              className="mb-5 flex justify-center xl:justify-start"
-            >
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-wide"
-                style={{ backgroundColor: 'var(--accent-pink-light)', color: 'var(--accent-pink)' }}
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M5 0.5L6.2 3.8L9.5 4.5L7 6.5L7.5 9.5L5 8L2.5 9.5L3 6.5L0.5 4.5L3.8 3.8L5 0.5Z" fill="currentColor" opacity="0.7" />
-                </svg>
-                AI-Powered Scheduling
-              </span>
-            </motion.div>
-
             {/* Headline */}
             <motion.h1
               initial={prefersReduced ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15, ease: EASE }}
+              transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
               className="mb-5"
               style={{
-                fontSize: 'clamp(36px, 4.5vw, 54px)',
+                fontSize: 'clamp(44px, 5.5vw, 68px)',
                 lineHeight: 1.08,
                 letterSpacing: '-0.035em',
                 fontWeight: 700,
                 color: 'var(--text-primary)',
               }}
             >
-              From scope to
+              Karmen
               <br />
-              schedule{' '}
-              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>—</span>{' '}
               <span
                 style={{
                   background: 'linear-gradient(135deg, #3B82F6 0%, #2DD4BF 100%)',
@@ -364,21 +376,34 @@ export default function ProjectSelector({
                   backgroundClip: 'text',
                 }}
               >
-                in seconds.
+                Sample Demo
               </span>
             </motion.h1>
 
-            {/* Subtitle */}
-            <motion.p
+            {/* Subtitle — glass callout */}
+            <motion.div
               initial={prefersReduced ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3, ease: EASE }}
-              className="text-[15px] leading-relaxed mb-8 max-w-md mx-auto xl:mx-0"
-              style={{ color: 'var(--text-secondary)' }}
+              className="mb-8 max-w-lg mx-auto xl:mx-0 rounded-xl px-5 py-4"
+              style={{
+                background: 'rgba(255,255,255,0.55)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(59,130,246,0.12)',
+                boxShadow: '0 2px 12px rgba(59,130,246,0.06)',
+              }}
             >
-              Generate CPM schedules, simulate change orders, and run
-              Monte Carlo risk analysis — all powered by AI.
-            </motion.p>
+              <p
+                className="text-[15px] leading-relaxed"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                This interactive demo offers a small taste of Karmen&#39;s AI-powered
+                scheduling capabilities. It doesn&#39;t showcase the full product, but
+                gives you a hands-on feel for CPM generation, change order analysis,
+                and Monte Carlo risk simulation.
+              </p>
+            </motion.div>
 
             {/* Feature pills */}
             <motion.div
@@ -415,6 +440,11 @@ export default function ProjectSelector({
         </div>
       </section>
 
+      {/* Separator line */}
+      <div className="flex justify-center pb-10">
+        <div className="w-96 h-px" style={{ background: 'var(--border-default)' }} />
+      </div>
+
       {/* ─── Sample Projects ─── */}
       <section className="max-w-[1080px] mx-auto px-8 pb-16">
         <motion.div
@@ -450,7 +480,7 @@ export default function ProjectSelector({
       </section>
 
       {/* ─── Custom Scope ─── */}
-      <section className="max-w-2xl mx-auto px-8 pb-24">
+      <section ref={scopeSectionRef} className="max-w-2xl mx-auto px-8 pb-24">
         <motion.div
           initial={prefersReduced ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
