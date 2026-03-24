@@ -330,22 +330,38 @@ export default function ProjectSelector({
 
   return (
     <div className="relative overflow-hidden">
-      {/* Dot grid background — gradient matches "in seconds" text */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          background: 'linear-gradient(135deg, #3B82F6 0%, #2DD4BF 100%)',
-          backgroundSize: '100% 100%',
-          maskImage: 'radial-gradient(circle, black 1px, transparent 1px), radial-gradient(ellipse 60% 50% at 50% 40%, transparent 30%, rgba(0,0,0,0.3) 60%, black 100%), radial-gradient(ellipse 55% 18% at 50% 62%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%), radial-gradient(ellipse 40% 20% at 50% 88%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%)',
-          maskSize: '12px 12px, 100% 100%, 100% 100%, 100% 100%',
-          maskPosition: '0 -5.65px, 0 0, 0 0, 0 0',
-          maskComposite: 'intersect',
-          WebkitMaskImage: 'radial-gradient(circle, black 1px, transparent 1px), radial-gradient(ellipse 60% 50% at 50% 40%, transparent 30%, rgba(0,0,0,0.3) 60%, black 100%), radial-gradient(ellipse 55% 18% at 50% 62%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%), radial-gradient(ellipse 40% 20% at 50% 88%, transparent 20%, rgba(0,0,0,0.3) 50%, black 100%)',
-          WebkitMaskSize: '12px 12px, 100% 100%, 100% 100%, 100% 100%',
-          WebkitMaskPosition: '0 -5.65px, 0 0, 0 0, 0 0',
-          WebkitMaskComposite: 'destination-in',
-        }}
-      />
+      {/* Pure white background behind the grid */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          {/* Gradient for grid lines — blue to teal, matching the brand */}
+          <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#2DD4BF" />
+          </linearGradient>
+          {/* Small grid cell */}
+          <pattern id="smallGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="url(#gridGradient)" strokeWidth="0.5" opacity="0.25" />
+          </pattern>
+          {/* Large grid cell — every 5th line is bolder */}
+          <pattern id="largeGrid" width="140" height="140" patternUnits="userSpaceOnUse">
+            <rect width="140" height="140" fill="url(#smallGrid)" />
+            <path d="M 140 0 L 0 0 0 140" fill="none" stroke="url(#gridGradient)" strokeWidth="1.2" opacity="0.3" />
+          </pattern>
+          {/* Mask: white = visible, black = hidden. Punch a soft hole where the heading lives (top-left area) */}
+          <radialGradient id="headingHole" cx="35%" cy="16%" rx="22%" ry="12%" fx="35%" fy="16%" gradientUnits="objectBoundingBox">
+            <stop offset="0%" stopColor="black" stopOpacity="1" />
+            <stop offset="70%" stopColor="black" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="black" stopOpacity="0" />
+          </radialGradient>
+          <mask id="gridMask">
+            {/* Start fully visible */}
+            <rect width="100%" height="100%" fill="white" />
+            {/* Cut out the heading area with a soft elliptical fade */}
+            <ellipse cx="35%" cy="16%" rx="22%" ry="12%" fill="url(#headingHole)" />
+          </mask>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#largeGrid)" mask="url(#gridMask)" />
+      </svg>
 
       {/* ─── Hero Section: Split Layout ─── */}
       <section className="relative max-w-[1200px] mx-auto px-8 pt-16 pb-20">
