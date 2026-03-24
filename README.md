@@ -21,7 +21,7 @@ Built as a portfolio piece for the [Karmen](https://karmen.ai) founding team (YC
 ## System Design
 
 <p align="center">
-  <img src="assets/system-design-workflows.png" alt="System design and workflow diagram" width="100%" />
+  <img src="assets/workflows3.png" alt="System design and workflow diagram" width="100%" />
 </p>
 
 ---
