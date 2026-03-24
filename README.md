@@ -1,10 +1,10 @@
 <p align="center">
-  An interactive demo of an AI-powered construction scheduler.<br/>
-  Select a project or scope your own to demo the product. 
+  An interactive demo of a construction scheduler with smart LLM integration.<br/>
+  Start by going to this <strong><a href="https://karmen-playground.vercel.app">Live Demo</a></strong>.
 </p>
 
 <p align="center">
-  <strong><a href="https://karmen-playground.vercel.app">View Live Demo</a></strong> · Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
+   Built as a portfolio piece for the <a href="https://karmen.ai">Karmen</a> founding team (YC F24)
 </p>
 
 
