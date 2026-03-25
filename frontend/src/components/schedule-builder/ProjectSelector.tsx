@@ -329,8 +329,8 @@ export default function ProjectSelector({
   }
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Pure white background behind the grid */}
+    <div className="relative overflow-hidden" style={{ background: 'linear-gradient(145deg, rgba(219,234,254,0.2) 0%, rgba(248,250,255,0.12) 35%, rgba(255,255,255,1) 55%, rgba(204,251,241,0.15) 100%)' }}>
+      {/* Subtle gradient background + grid */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg">
         <defs>
           {/* Gradient for grid lines — blue to teal, matching the brand */}
