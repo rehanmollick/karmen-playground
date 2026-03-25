@@ -14,9 +14,18 @@ app = FastAPI(
 )
 
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+# Allow both the configured URL and common Vercel preview/production patterns
+allowed_origins = [
+    frontend_url,
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://karmen-playground.vercel.app",
+]
+# Also allow any Vercel preview deploys for this project
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url, "http://localhost:3000", "http://localhost:3001"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://karmen-playground-.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
