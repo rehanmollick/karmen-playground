@@ -37,7 +37,7 @@
 ## System Design
 
 <p align="center">
-  <img src="assets/workflows3.png" alt="System design and workflow diagram" width="100%" />
+  <img src="system-design-workflows3.png" alt="System design and workflow diagram" width="100%" />
 </p>
 
 ---
