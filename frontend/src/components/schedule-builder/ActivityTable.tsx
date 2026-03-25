@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Project, WBSNode } from '../../types/schedule';
 import { formatDate, formatDuration } from '../../lib/formatters';
 
