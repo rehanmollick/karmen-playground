@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
 
 from app.services.export_service import generate_msproject_xml
@@ -8,8 +8,9 @@ router = APIRouter()
 
 
 @router.get("/export/{project_id}")
-async def export_project(project_id: str, format: str = "xml"):
-    project = get_project(project_id)
+async def export_project(project_id: str, request: Request, format: str = "xml", session_id: str = ""):
+    sid = session_id or request.headers.get("x-session-id", "")
+    project = get_project(project_id, sid)
     if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
 

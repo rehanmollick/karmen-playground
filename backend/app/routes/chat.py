@@ -16,7 +16,8 @@ async def chat(request: Request, body: dict = Body(...)):
     message = body.get("message", "").strip()
     history = body.get("history", [])  # list of {role, content}
 
-    project = get_project(project_id)
+    sid = request.headers.get("x-session-id", "")
+    project = get_project(project_id, sid)
     if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     if not message:
@@ -81,7 +82,7 @@ async def chat(request: Request, body: dict = Body(...)):
                     diff.append({"type": "add_dependency", "from": from_id, "to": to_id})
 
         project_copy = apply_cpm_to_project(project_copy)
-        set_project(project_copy.id, project_copy)
+        set_project(project_copy.id, project_copy, sid)
 
         return {
             "type": "edit",

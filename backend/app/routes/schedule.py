@@ -12,17 +12,19 @@ from app.cache.cache_manager import cache
 
 router = APIRouter()
 
-# Keep _projects as a local alias for backwards-compat within this module
-_projects = get_projects()
-
 try:
     load_seed_projects()
 except Exception as e:
     print(f"Warning: seed load failed: {e}")
 
 
+def _session_id(request: Request) -> str:
+    return request.headers.get("x-session-id", "")
+
+
 @router.get("/projects", response_model=List[ProjectSummary])
-async def list_projects():
+async def list_projects(request: Request):
+    sid = _session_id(request)
     return [
         ProjectSummary(
             id=p.id,
@@ -32,27 +34,29 @@ async def list_projects():
             duration_days=p.project_duration_days,
             project_type=p.project_type,
         )
-        for p in get_projects().values()
+        for p in get_projects(sid).values()
     ]
 
 
 @router.get("/projects/{project_id}", response_model=Project)
-async def get_project_route(project_id: str):
-    project = get_project(project_id)
+async def get_project_route(project_id: str, request: Request):
+    sid = _session_id(request)
+    project = get_project(project_id, sid)
     if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     return project
 
 
 @router.patch("/projects/{project_id}")
-async def update_project(project_id: str, body: dict = Body(...)):
+async def update_project(project_id: str, request: Request, body: dict = Body(...)):
     """Replace a project in the store with updated data (used for applying change orders)."""
-    if get_project(project_id) is None:
+    sid = _session_id(request)
+    if get_project(project_id, sid) is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     try:
         project = Project(**body)
         project = apply_cpm_to_project(project)
-        set_project(project_id, project)
+        set_project(project_id, project, sid)
         return project
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -60,6 +64,7 @@ async def update_project(project_id: str, body: dict = Body(...)):
 
 @router.post("/schedule/generate")
 async def generate_schedule(request: Request, body: dict = Body(...)):
+    sid = _session_id(request)
     scope_text = body.get("scope_text", "").strip()
     project_type = body.get("project_type", "residential")
 
@@ -70,12 +75,15 @@ async def generate_schedule(request: Request, body: dict = Body(...)):
     if not cache.check_rate_limit(client_ip):
         raise HTTPException(
             status_code=429,
-            detail="Rate limit reached. This is a demo — for the full experience, reach out to the Karmen team!",
+            detail="Rate limit reached. This is a demo -- for the full experience, reach out to the Karmen team!",
         )
 
     cache_key = f"gen:{hashlib.md5(scope_text[:200].encode()).hexdigest()}"
     cached = cache.get_by_key(cache_key)
     if cached:
+        # Still store in session so it shows up in their project list
+        cached_project = Project(**cached)
+        set_project(cached_project.id, cached_project, sid)
         return cached
 
     from app.services.llm_service import generate_schedule_from_scope
@@ -93,7 +101,7 @@ async def generate_schedule(request: Request, body: dict = Body(...)):
         activities=_parse_activities(llm_data.get("activities", [])),
     )
     project = apply_cpm_to_project(project)
-    set_project(project.id, project)
+    set_project(project.id, project, sid)
 
     result = project.model_dump(mode="json")
     cache.set_by_key(cache_key, result)
@@ -102,10 +110,11 @@ async def generate_schedule(request: Request, body: dict = Body(...)):
 
 @router.post("/schedule/edit")
 async def edit_schedule(request: Request, body: dict = Body(...)):
+    sid = _session_id(request)
     project_id = body.get("project_id", "")
     instruction = body.get("instruction", "").strip()
 
-    if get_project(project_id) is None:
+    if get_project(project_id, sid) is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     if not instruction:
         raise HTTPException(status_code=400, detail="instruction is required")
@@ -114,10 +123,10 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
     if not cache.check_rate_limit(client_ip):
         raise HTTPException(
             status_code=429,
-            detail="Rate limit reached. This is a demo — for the full experience, reach out to the Karmen team!",
+            detail="Rate limit reached. This is a demo -- for the full experience, reach out to the Karmen team!",
         )
 
-    project = copy.deepcopy(get_project(project_id))
+    project = copy.deepcopy(get_project(project_id, sid))
 
     from app.services.llm_service import edit_schedule_nl
 
@@ -164,7 +173,7 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
                 diff.append({"type": "add_dependency", "from": from_id, "to": to_id})
 
     project = apply_cpm_to_project(project)
-    set_project(project.id, project)
+    set_project(project.id, project, sid)
 
     return {
         "project": project.model_dump(mode="json"),

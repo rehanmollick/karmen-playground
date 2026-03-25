@@ -5,12 +5,27 @@ const API_URL =
     ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+function getSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let id = localStorage.getItem('karmen_session_id');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('karmen_session_id', id);
+  }
+  return id;
+}
+
 export async function apiFetch<T = unknown>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
+  const sessionId = getSessionId();
   const res = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(sessionId ? { 'X-Session-ID': sessionId } : {}),
+      ...options?.headers,
+    },
     ...options,
   });
   if (!res.ok) {
@@ -63,5 +78,5 @@ export const api = {
       body: JSON.stringify({ project_id: projectId, message, history }),
     }),
   exportXmlUrl: (projectId: string) =>
-    `${API_URL}/api/export/${projectId}?format=xml`,
+    `${API_URL}/api/export/${projectId}?session_id=${getSessionId()}`,
 };

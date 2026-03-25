@@ -44,7 +44,8 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
     project_id = body.get("project_id", "")
     co_id = body.get("change_order_id", "")
 
-    project = get_project(project_id)
+    sid = request.headers.get("x-session-id", "")
+    project = get_project(project_id, sid)
     if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     if co_id not in _change_orders:
@@ -133,7 +134,8 @@ async def analyze_custom_change_order(request: Request, body: dict = Body(...)):
     description = body.get("description", "").strip()
     source = body.get("source", "Owner Directive")
 
-    project = get_project(project_id)
+    sid = request.headers.get("x-session-id", "")
+    project = get_project(project_id, sid)
     if project is None:
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
     if not description:
