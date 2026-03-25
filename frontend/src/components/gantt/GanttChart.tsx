@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { Project } from '../../types/schedule';
 import { buildGanttLayout, barById, DAY_WIDTH, ROW_HEIGHT } from '../../lib/ganttUtils';
 import GanttTimeline from './GanttTimeline';
@@ -10,6 +10,7 @@ import GanttDependency, { ArrowheadDef } from './GanttDependency';
 interface GanttChartProps {
   project: Project;
   highlightedId?: string;
+  flashIds?: Set<string>;
   newActivityIds?: Set<string>;
   modifiedActivityIds?: Set<string>;
 }
@@ -17,15 +18,51 @@ interface GanttChartProps {
 export default function GanttChart({
   project,
   highlightedId,
+  flashIds,
   newActivityIds,
   modifiedActivityIds,
 }: GanttChartProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  function toggleFullscreen() {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  }
+
+  useEffect(() => {
+    function onFSChange() {
+      setIsFullscreen(!!document.fullscreenElement);
+    }
+    document.addEventListener('fullscreenchange', onFSChange);
+    return () => document.removeEventListener('fullscreenchange', onFSChange);
+  }, []);
 
   const layout = buildGanttLayout(project);
   const { weeks, bars, totalDays } = layout;
   const barsMap = barById(bars);
+
+  // Scroll to first flash activity
+  useEffect(() => {
+    if (!flashIds || flashIds.size === 0 || !scrollRef.current) return;
+    const firstId = Array.from(flashIds)[0];
+    const bar = bars.find((b) => b.activity.id === firstId);
+    if (bar) {
+      const scrollTop = bar.row * ROW_HEIGHT - scrollRef.current.clientHeight / 3;
+      const scrollLeft = bar.left * zoom - scrollRef.current.clientWidth / 3;
+      scrollRef.current.scrollTo({
+        top: Math.max(0, scrollTop),
+        left: Math.max(0, scrollLeft),
+        behavior: 'smooth',
+      });
+    }
+  }, [flashIds, bars, zoom]);
 
   const svgWidth = totalDays * DAY_WIDTH * zoom;
 
@@ -40,7 +77,7 @@ export default function GanttChart({
   });
 
   return (
-    <div className="flex flex-col h-full">
+    <div ref={containerRef} className={`flex flex-col h-full ${isFullscreen ? 'bg-white' : ''}`}>
       {/* Controls */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
         <span className="text-xs text-[var(--text-muted)]">
@@ -59,6 +96,22 @@ export default function GanttChart({
             className="w-6 h-6 flex items-center justify-center rounded text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] text-sm"
           >
             +
+          </button>
+          <div className="w-px h-4 bg-[var(--border-default)]" />
+          <button
+            onClick={toggleFullscreen}
+            className="w-6 h-6 flex items-center justify-center rounded text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
+            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+          >
+            {isFullscreen ? (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M5 1v3H1M9 1v3h4M5 13v-3H1M9 13v-3h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 5V1h4M13 5V1H9M1 9v4h4M13 9v4H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
@@ -132,6 +185,7 @@ export default function GanttChart({
                   bar={scaledBar}
                   index={index}
                   highlighted={bar.activity.id === highlightedId}
+                  flash={flashIds?.has(bar.activity.id)}
                   newActivity={newActivityIds?.has(bar.activity.id)}
                   modifiedActivity={modifiedActivityIds?.has(bar.activity.id)}
                 />

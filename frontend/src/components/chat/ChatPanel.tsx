@@ -8,10 +8,11 @@ import { api } from '../../lib/api';
 interface ChatPanelProps {
   projectId: string;
   onScheduleUpdate?: () => void;
+  onScheduleEdit?: (changedIds: string[]) => void;
   onActivityClick?: (id: string) => void;
 }
 
-export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick }: ChatPanelProps) {
+export default function ChatPanel({ projectId, onScheduleUpdate, onScheduleEdit, onActivityClick }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -51,7 +52,7 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
     ]);
 
     try {
-      const result = await api.chat(projectId, text, history) as { type: string; content?: string };
+      const result = await api.chat(projectId, text, history) as { type: string; content?: string; diff?: Array<{ activity_id?: string }> };
       const isEdit = result?.type === 'edit';
       const responseText = result?.content || (isEdit ? 'Schedule updated.' : 'Done.');
 
@@ -65,6 +66,13 @@ export default function ChatPanel({ projectId, onScheduleUpdate, onActivityClick
 
       if (isEdit) {
         onScheduleUpdate?.();
+        // Extract changed activity IDs from diff
+        const changedIds = (result.diff || [])
+          .map((d) => d.activity_id)
+          .filter((id): id is string => !!id);
+        if (changedIds.length > 0) {
+          onScheduleEdit?.(changedIds);
+        }
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : 'Something went wrong. Try again.';

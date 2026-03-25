@@ -1,16 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Project, WBSNode } from '../../types/schedule';
 import { formatDate, formatDuration } from '../../lib/formatters';
 
 interface ActivityTableProps {
   project: Project;
   highlightedId?: string;
+  flashIds?: Set<string>;
   onActivityClick?: (id: string) => void;
 }
 
-export default function ActivityTable({ project, highlightedId, onActivityClick }: ActivityTableProps) {
+export default function ActivityTable({ project, highlightedId, flashIds, onActivityClick }: ActivityTableProps) {
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to first flash activity
+  useEffect(() => {
+    if (!flashIds || flashIds.size === 0 || !tableRef.current) return;
+    const firstId = Array.from(flashIds)[0];
+    const row = tableRef.current.querySelector(`[data-activity-id="${firstId}"]`);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [flashIds]);
   const [collapsedWBS, setCollapsedWBS] = useState<Set<string>>(new Set());
 
   const toggleWBS = (id: string) => {
@@ -41,7 +53,7 @@ export default function ActivityTable({ project, highlightedId, onActivityClick 
   const activityMap = new Map(project.activities.map((a) => [a.id, a]));
 
   return (
-    <div className="overflow-x-auto overflow-y-auto h-full">
+    <div ref={tableRef} className="overflow-x-auto overflow-y-auto h-full">
       <table className="w-full border-collapse text-sm" style={{ minWidth: 560 }}>
         <thead className="sticky top-0 bg-[var(--bg-secondary)] z-10">
           <tr>
@@ -91,13 +103,15 @@ export default function ActivityTable({ project, highlightedId, onActivityClick 
             const activity = activityMap.get(row.actId);
             if (!activity) return null;
             const isHighlighted = activity.id === highlightedId;
+            const isFlashing = flashIds?.has(activity.id);
 
             return (
               <tr
                 key={`act-${activity.id}`}
+                data-activity-id={activity.id}
                 className={`
                   border-b border-[var(--border-subtle)] cursor-pointer transition-colors
-                  ${isHighlighted ? 'bg-[var(--blue-light)]' : 'hover:bg-[var(--bg-tertiary)]'}
+                  ${isFlashing ? 'animate-flash-highlight' : isHighlighted ? 'bg-[var(--blue-light)]' : 'hover:bg-[var(--bg-tertiary)]'}
                 `}
                 onClick={() => onActivityClick?.(activity.id)}
               >

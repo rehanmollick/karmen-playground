@@ -60,6 +60,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('schedule');
   const [prevTab, setPrevTab] = useState<TabId>('schedule');
   const [highlightedActivityId, setHighlightedActivityId] = useState<string | undefined>();
+  const [flashActivityIds, setFlashActivityIds] = useState<Set<string> | undefined>();
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Change order state
   const [changeOrders, setChangeOrders] = useState<ChangeOrder[]>([]);
@@ -145,6 +147,13 @@ export default function Home() {
     }
   }, [activeProject]);
 
+  const triggerFlash = useCallback((ids: string[]) => {
+    if (ids.length === 0) return;
+    setFlashActivityIds(new Set(ids));
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    flashTimerRef.current = setTimeout(() => setFlashActivityIds(undefined), 5000);
+  }, []);
+
   function handleTabChange(tab: TabId) {
     setPrevTab(activeTab);
     setActiveTab(tab);
@@ -163,6 +172,23 @@ export default function Home() {
 
   async function handleApplyCO(modifiedProject: Project) {
     if (!activeProject || !selectedCOId) return;
+    // Collect changed activity IDs before applying
+    const changedIds: string[] = [];
+    if (coAnalysis) {
+      // New activities (in modified but not in original)
+      coAnalysis.modified_project.activities.forEach((a) => {
+        if (!activeProject.activities.find((orig) => orig.id === a.id)) {
+          changedIds.push(a.id);
+        }
+      });
+      // Modified activities from fragnet
+      const co = changeOrders.find((c) => c.id === selectedCOId);
+      if (co?.fragnet?.modified_activities) {
+        co.fragnet.modified_activities.forEach((m) => {
+          changedIds.push(m.activity_id);
+        });
+      }
+    }
     try {
       await api.updateProject(activeProject.id, modifiedProject);
     } catch {
@@ -170,8 +196,12 @@ export default function Home() {
     }
     overrideActiveProject({ ...modifiedProject, id: activeProject.id });
     setAppliedCOIds((prev) => new Set(prev).add(selectedCOId));
-    // Navigate to Schedule Builder so the user can see the updated schedule
+    // Navigate to Schedule Builder and flash changed activities
     handleTabChange('schedule');
+    if (changedIds.length > 0) {
+      // Small delay so the tab transition completes first
+      setTimeout(() => triggerFlash(changedIds), 300);
+    }
   }
 
   function handleExport() {
@@ -302,6 +332,7 @@ export default function Home() {
                       <ActivityTable
                         project={activeProject}
                         highlightedId={highlightedActivityId}
+                        flashIds={flashActivityIds}
                         onActivityClick={setHighlightedActivityId}
                       />
                     </div>
@@ -324,7 +355,7 @@ export default function Home() {
                   {/* Right: Gantt + Chat */}
                   <div className="flex-1 flex flex-col min-h-0 min-w-0" ref={vSplit.containerRef}>
                     <div className="min-h-0 overflow-hidden" style={{ height: `${vSplit.size}%` }}>
-                      <GanttChart project={activeProject} highlightedId={highlightedActivityId} />
+                      <GanttChart project={activeProject} highlightedId={highlightedActivityId} flashIds={flashActivityIds} />
                     </div>
 
                     {/* Horizontal resize handle */}
@@ -356,6 +387,7 @@ export default function Home() {
                         <ChatPanel
                           projectId={activeProject.id}
                           onScheduleUpdate={refreshProject}
+                          onScheduleEdit={triggerFlash}
                           onActivityClick={setHighlightedActivityId}
                         />
                       </div>

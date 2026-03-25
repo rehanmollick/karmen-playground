@@ -10,11 +10,12 @@ interface GanttBarProps {
   bar: GanttBarData;
   index?: number;
   highlighted?: boolean;
+  flash?: boolean;
   newActivity?: boolean;
   modifiedActivity?: boolean;
 }
 
-export default function GanttBar({ bar, index = 0, highlighted, newActivity, modifiedActivity }: GanttBarProps) {
+export default function GanttBar({ bar, index = 0, highlighted, flash, newActivity, modifiedActivity }: GanttBarProps) {
   const [tooltip, setTooltip] = useState(false);
   const { activity, left, width, row } = bar;
 
@@ -68,11 +69,14 @@ export default function GanttBar({ bar, index = 0, highlighted, newActivity, mod
         fill={barColor}
         rx={0}
         opacity={newActivity || modifiedActivity ? 0.85 : 1}
-        animate={isCritical && !newActivity && !modifiedActivity ? {
+        animate={flash ? {
+          opacity: [1, 0.4, 1, 0.4, 1],
+          scaleY: [1, 1.3, 1, 1.3, 1],
+        } : isCritical && !newActivity && !modifiedActivity ? {
           opacity: [1, 0.6, 1],
           scaleY: [1, 1.05, 1],
         } : {}}
-        transition={isCritical ? { duration: 0.6, delay: index * 0.03 + 0.4, ease: 'easeInOut' } : {}}
+        transition={flash ? { duration: 2, ease: 'easeInOut' } : isCritical ? { duration: 0.6, delay: index * 0.03 + 0.4, ease: 'easeInOut' } : {}}
       />
       {width > 48 && (
         <text

@@ -108,6 +108,17 @@ body {
   100% { opacity: 1; transform: translateX(-50%) scale(1.06); }
 }
 
+/* Flash highlight for changed activities */
+@keyframes flashHighlight {
+  0% { background-color: rgba(59, 130, 246, 0.35); }
+  50% { background-color: rgba(59, 130, 246, 0.2); }
+  100% { background-color: transparent; }
+}
+
+.animate-flash-highlight {
+  animation: flashHighlight 4.5s ease-out forwards;
+}
+
 /* Reduced motion: disable all animations gracefully */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
