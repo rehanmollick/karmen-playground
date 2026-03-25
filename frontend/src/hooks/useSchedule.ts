@@ -58,9 +58,16 @@ export function useSchedule() {
     }
   }, [activeProject]);
 
-  const clearProject = useCallback(() => {
+  const clearProject = useCallback(async () => {
     setActiveProject(null);
     setError(null);
+    // Re-fetch project list so any AI-generated projects show up
+    try {
+      const data = await api.getProjects() as ProjectSummary[];
+      setProjects(data);
+    } catch {
+      // silently fail
+    }
   }, []);
 
   const overrideActiveProject = useCallback((project: Project) => {
