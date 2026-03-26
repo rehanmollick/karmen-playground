@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException, Request, Body
 from typing import List
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.models.change_order import ChangeOrder, ImpactAnalysis, Fragnet, ActivityDelta, DependencyLink
 from app.models.schedule import Activity, Dependency
@@ -25,13 +28,13 @@ def _load_change_orders():
                 co = ChangeOrder(**co_data)
                 _change_orders[co.id] = co
             except Exception as e:
-                print(f"Warning: could not load CO {co_data.get('id')}: {e}")
+                logger.warning("Could not load CO %s: %s", co_data.get('id'), e)
 
 
 try:
     _load_change_orders()
 except Exception as e:
-    print(f"Warning: change order load failed: {e}")
+    logger.warning("Change order load failed: %s", e)
 
 
 @router.get("/projects/{project_id}/change-orders", response_model=List[ChangeOrder])

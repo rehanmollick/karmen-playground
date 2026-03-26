@@ -6,8 +6,11 @@ in that session's private store. Generated projects are always session-scoped.
 """
 
 import json
+import logging
 import os
 import copy
+
+logger = logging.getLogger(__name__)
 
 # Shared seed projects (read-only after startup)
 _seed_projects: dict = {}
@@ -68,4 +71,4 @@ def load_seed_projects() -> None:
                 project = apply_cpm_to_project(project)
                 _seed_projects[project.id] = project
             except Exception as e:
-                print(f"Warning: could not load {pid}: {e}")
+                logger.warning("Could not load %s: %s", pid, e)

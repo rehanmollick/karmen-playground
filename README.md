@@ -1,16 +1,16 @@
+<h1 align="center">Karmen Playground</h1>
+
 <p align="center">
   An interactive demo of a construction scheduler with smart LLM integration.<br/>
-  Start by learning about it down below and then check out the <strong><a href="https://karmen-playground-x8qu4ahoc-rehanmollicks-projects.vercel.app/">Live Demo</a></strong>.
+  Start by learning about it down below and then check out the <strong><a href="https://karmen-playground.vercel.app/">Live Demo</a></strong>.
 </p>
 
-
 <p align="center">
-  <img src="assets/hero-screenshot.png" alt="Karmen Playground" width="100%" />
+  <img src="assets/hero-screenshot.jpg" alt="Karmen Playground" width="100%" />
 </p>
 
-
 <p align="center">
-      Built as a portfolio piece for the Karmen (https://www.karmenai.com/) founding team (YC F24).
+  Built as a portfolio piece for the <a href="https://www.karmenai.com/">Karmen</a> founding team (YC F24).
 </p>
 
 
@@ -37,7 +37,7 @@
 ## System Design
 
 <p align="center">
-  <img src="system-design-workflows3.png" alt="System design and workflow diagram" width="100%" />
+  <img src="assets/system-design-workflows3.png" alt="System design and workflow diagram" width="100%" />
 </p>
 
 ---

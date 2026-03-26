@@ -3,7 +3,10 @@ from typing import List
 import json
 import copy
 import hashlib
+import logging
 from datetime import date
+
+logger = logging.getLogger(__name__)
 
 from app.models.schedule import Project, ProjectSummary, Activity, Dependency, WBSNode
 from app.services.cpm_engine import apply_cpm_to_project
@@ -15,7 +18,7 @@ router = APIRouter()
 try:
     load_seed_projects()
 except Exception as e:
-    print(f"Warning: seed load failed: {e}")
+    logger.warning("Seed load failed: %s", e)
 
 
 def _session_id(request: Request) -> str:
