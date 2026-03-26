@@ -22,7 +22,8 @@
 
 **Schedule Builder** -- Type what you're building and AI will create your full project schedule + you can edit it easily via a chat assistant. 
 
->Describe your scope in plain text, get back a complete CPM schedule with activities, dependencies, and a Gantt chart. Then edit it by chatting naturally ("push drywall back two weeks", "add concrete curing after foundations") and watch the schedule recompute live. Critical path highlighting, dependency arrows, and interactive tooltips included.
+>Describe your scope in plain text -> get back a complete CPM schedule with activities, dependencies, and a Gantt chart.
+>You can then use the chat assistant to make quick edits and ask questions. 
 
 **Change Order Simulator** -- Pick a change order and instantly see how it affects your schedule. 
 
