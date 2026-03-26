@@ -54,7 +54,7 @@ export function useSchedule() {
       const data = await api.getProject(activeProject.id) as Project;
       setActiveProject(data);
     } catch {
-      // silently fail on refresh
+      // Non-critical: active project data is already displayed, refresh is best-effort
     }
   }, [activeProject]);
 
@@ -66,7 +66,7 @@ export function useSchedule() {
       const data = await api.getProjects() as ProjectSummary[];
       setProjects(data);
     } catch {
-      // silently fail
+      // Non-critical: existing project list remains valid
     }
   }, []);
 

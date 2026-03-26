@@ -30,9 +30,9 @@ export default function GanttChart({
   function toggleFullscreen() {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => { /* Fullscreen may be blocked by browser/iframe policy */ });
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => { /* Already exited */ });
     }
   }
 
@@ -86,6 +86,7 @@ export default function GanttChart({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setZoom((z) => Math.max(0.4, z - 0.2))}
+            aria-label="Zoom out"
             className="w-6 h-6 flex items-center justify-center rounded text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] text-sm"
           >
             −
@@ -93,6 +94,7 @@ export default function GanttChart({
           <span className="text-xs text-[var(--text-muted)] w-10 text-center">{Math.round(zoom * 100)}%</span>
           <button
             onClick={() => setZoom((z) => Math.min(2, z + 0.2))}
+            aria-label="Zoom in"
             className="w-6 h-6 flex items-center justify-center rounded text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] text-sm"
           >
             +
@@ -101,6 +103,7 @@ export default function GanttChart({
           <button
             onClick={toggleFullscreen}
             className="w-6 h-6 flex items-center justify-center rounded text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           >
             {isFullscreen ? (
