@@ -3,6 +3,7 @@
 <p align="center">
   An interactive demo of a construction scheduler with smart LLM integration.<br/>
   Start by learning about it down below and then check out the <strong><a href="https://karmen-playground.vercel.app/">Live Demo</a></strong>.
+  (Live Demo currently unavailable bc backend is down - Reach out to me and I will put the backend back up!) 
 </p>
 
 <p align="center">
