@@ -2,8 +2,8 @@
 
 <p align="center">
   An interactive demo of a construction scheduler with smart LLM integration.<br/>
-  Start by learning about it down below and then check out the <strong><a href="https://karmen-playground.vercel.app/">Live Demo</a></strong>.
-  (Live Demo currently unavailable bc backend is down - Reach out to me and I will put the backend back up!) 
+  Start by learning about it down below and then check out the <strong><a href="https://karmen-playground.vercel.app/">Live Demo</a></strong>.<br/>
+  <sub>The backend runs on a free tier and sleeps when idle — the first load after a quiet period may take ~30s to wake up.</sub>
 </p>
 
 <p align="center">
@@ -54,7 +54,7 @@
 | CPM Engine | NetworkX (forward/backward pass, FS/SS/FF/SF dependencies with lag) |
 | Monte Carlo | NumPy (PERT Beta sampling, 10K vectorized iterations), SciPy (Spearman correlation) |
 | Storage | In-memory cache + JSON seed data (no database) |
-| Deployment | [Vercel](https://vercel.com) (frontend) + [Railway](https://railway.app) (backend) |
+| Deployment | [Vercel](https://vercel.com) (frontend) + [Render](https://render.com) (backend) |
 
 ---
 
