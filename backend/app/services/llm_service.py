@@ -12,7 +12,7 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 # Primary: Flash for schedule logic (needs reasoning)
 FLASH_MODEL = "gemini-2.5-flash"
 # Secondary: Flash-Lite for narrative text (needs fluency)
-LITE_MODEL = "gemini-2.5-flash-lite-preview-06-17"
+LITE_MODEL = "gemini-2.5-flash-lite"
 
 
 def extract_json(text: str) -> dict:
