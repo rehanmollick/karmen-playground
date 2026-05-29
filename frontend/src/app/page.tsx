@@ -18,6 +18,7 @@ import TornadoChart from '../components/risk/TornadoChart';
 import RiskSummary from '../components/risk/RiskSummary';
 import RiskNarrative from '../components/risk/RiskNarrative';
 import LoadingAnimation from '../components/shared/LoadingAnimation';
+import ColdStartLoader from '../components/shared/ColdStartLoader';
 import { useSchedule } from '../hooks/useSchedule';
 import { useSimulation } from '../hooks/useSimulation';
 import { useResizable } from '../hooks/useResizable';
@@ -281,8 +282,8 @@ export default function Home() {
       {!activeProject ? (
         <main className="flex-1">
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <LoadingAnimation message="Loading projects…" rows={3} />
+            <div className="flex items-center justify-center min-h-[45vh] py-12">
+              <ColdStartLoader />
             </div>
           ) : scheduleError ? (
             <div className="flex flex-col items-center justify-center h-64 gap-3">

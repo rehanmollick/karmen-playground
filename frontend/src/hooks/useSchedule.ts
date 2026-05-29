@@ -12,13 +12,23 @@ export function useSchedule() {
   const loadProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
-    try {
-      const data = await api.getProjects() as ProjectSummary[];
-      setProjects(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load projects');
-    } finally {
-      setLoading(false);
+    // The backend sleeps on the free tier; a cold start can briefly return an
+    // error before it's ready, so retry a few times before giving up.
+    const maxAttempts = 5;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const data = await api.getProjects() as ProjectSummary[];
+        setProjects(data);
+        setLoading(false);
+        return;
+      } catch (err) {
+        if (attempt === maxAttempts) {
+          setError(err instanceof Error ? err.message : 'Failed to load projects');
+          setLoading(false);
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 3000));
+      }
     }
   }, []);
 

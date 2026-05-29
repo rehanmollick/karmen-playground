@@ -3,7 +3,7 @@
 <p align="center">
   An interactive demo of a construction scheduler with smart LLM integration.<br/>
   Start by learning about it down below and then check out the <strong><a href="https://karmen-playground.vercel.app/">Live Demo</a></strong>.<br/>
-  <sub>The backend runs on a free tier and sleeps when idle — the first load after a quiet period may take ~30s to wake up.</sub>
+  <sub>⏳ The backend is hosted on <a href="https://render.com">Render</a>'s free tier, which sleeps after inactivity — the first load may take ~30s while it wakes up, then it's responsive.</sub>
 </p>
 
 <p align="center">
