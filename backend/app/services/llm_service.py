@@ -1,5 +1,6 @@
 from google import genai
 from google.genai import types
+import asyncio
 import os
 import json
 import re
@@ -13,6 +14,12 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 FLASH_MODEL = "gemini-2.5-flash"
 # Secondary: Flash-Lite for narrative text (needs fluency)
 LITE_MODEL = "gemini-2.5-flash-lite"
+
+
+async def _generate(**kwargs):
+    # The genai client is synchronous; run it in a worker thread so a slow
+    # LLM round-trip doesn't block every other request on the event loop.
+    return await asyncio.to_thread(client.models.generate_content, **kwargs)
 
 
 def extract_json(text: str) -> dict:
@@ -34,7 +41,7 @@ def extract_json(text: str) -> dict:
 async def generate_schedule_from_scope(scope_text: str, project_type: str) -> dict:
     from app.prompts.scope_to_schedule import build_scope_prompt
     prompt = build_scope_prompt(scope_text, project_type)
-    response = client.models.generate_content(
+    response = await _generate(
         model=FLASH_MODEL,
         contents=prompt,
         config=types.GenerateContentConfig(
@@ -48,7 +55,7 @@ async def generate_schedule_from_scope(scope_text: str, project_type: str) -> di
 async def edit_schedule_nl(schedule_json: dict, instruction: str) -> dict:
     from app.prompts.natural_language_edit import build_edit_prompt
     prompt = build_edit_prompt(schedule_json, instruction)
-    response = client.models.generate_content(
+    response = await _generate(
         model=FLASH_MODEL,
         contents=prompt,
         config=types.GenerateContentConfig(temperature=0.2),
@@ -113,7 +120,7 @@ RULES:
 
     full_prompt = "\n".join(conversation_parts)
 
-    response = client.models.generate_content(
+    response = await _generate(
         model=FLASH_MODEL,
         contents=full_prompt,
         config=types.GenerateContentConfig(temperature=0.3),
@@ -158,7 +165,7 @@ async def analyze_change_order_llm(
     from app.prompts.change_order_impact import build_co_prompt
     prompt = build_co_prompt(schedule_json, co_name, co_description, co_source)
     model = FLASH_MODEL if use_flash else LITE_MODEL
-    response = client.models.generate_content(
+    response = await _generate(
         model=model,
         contents=prompt,
         config=types.GenerateContentConfig(temperature=0.4),
