@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import spearmanr
+from collections import deque
 from datetime import date, timedelta
 from typing import List, Dict
 import time
@@ -26,21 +27,50 @@ def pert_sample(
     return optimistic + samples * (pessimistic - optimistic)
 
 
+def _topological_order(activities_data: List[Dict]) -> List[Dict]:
+    """Kahn's algorithm over the dependency graph. Activities caught in a
+    cycle are appended in input order; their cyclic links get skipped in the
+    forward pass, matching the deterministic engine's cycle behavior."""
+    ids = [a["id"] for a in activities_data]
+    id_set = set(ids)
+    indegree = {i: 0 for i in ids}
+    successors: Dict[str, List[str]] = {i: [] for i in ids}
+    for act in activities_data:
+        for dep in act.get("predecessors", []):
+            p = dep["predecessor_id"]
+            if p in id_set and p != act["id"]:
+                successors[p].append(act["id"])
+                indegree[act["id"]] += 1
+
+    queue = deque(i for i in ids if indegree[i] == 0)
+    ordered_ids: List[str] = []
+    while queue:
+        n = queue.popleft()
+        ordered_ids.append(n)
+        for s in successors[n]:
+            indegree[s] -= 1
+            if indegree[s] == 0:
+                queue.append(s)
+
+    placed = set(ordered_ids)
+    ordered_ids.extend(i for i in ids if i not in placed)
+    by_id = {a["id"]: a for a in activities_data}
+    return [by_id[i] for i in ordered_ids]
+
+
 def _forward_pass_fast(
     activities_data: List[Dict],
     duration_samples: Dict[str, np.ndarray],
     iterations: int,
 ) -> np.ndarray:
-    """
-    Vectorised forward pass across all iterations simultaneously.
-    Activities must already be in topological order.
-    """
+    """Vectorised forward pass across all iterations simultaneously.
+    Input order doesn't matter — activities are topologically sorted here."""
     es: Dict[str, np.ndarray] = {}  # early start per iteration
     ef: Dict[str, np.ndarray] = {}  # early finish per iteration
 
     zeros = np.zeros(iterations)
 
-    for act in activities_data:
+    for act in _topological_order(activities_data):
         act_id = act["id"]
         dur = duration_samples.get(act_id, zeros)
         preds = act.get("predecessors", [])
@@ -55,11 +85,13 @@ def _forward_pass_fast(
                 dep_type = dep.get("type", "FS")
                 if pred_id not in ef:
                     continue
-                if dep_type == "FS":
-                    candidate = ef[pred_id] + lag
-                elif dep_type == "SS":
+                if dep_type == "SS":
                     candidate = es[pred_id] + lag
-                else:
+                elif dep_type == "FF":
+                    candidate = ef[pred_id] + lag - dur
+                elif dep_type == "SF":
+                    candidate = es[pred_id] + lag - dur
+                else:  # FS
                     candidate = ef[pred_id] + lag
                 max_ef = np.maximum(max_ef, candidate)
             es[act_id] = max_ef
@@ -93,7 +125,6 @@ def run_simulation(project: Project, config: SimulationConfig) -> SimulationResu
         else:
             all_samples[act.id] = np.full(iterations, float(act.duration_days))
 
-    # Build activities_data (topological order preserved from seed)
     activities_data = [
         {
             "id": a.id,

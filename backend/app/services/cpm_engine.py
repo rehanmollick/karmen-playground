@@ -24,10 +24,10 @@ def compute_cpm(activities: List[Activity], project_start: date) -> Dict[str, An
                 lag=float(dep.lag_days),
             )
 
-    # Remove edges to non-existent nodes
+    # Drop phantom nodes created by dangling predecessor IDs (add_edge silently
+    # creates the missing endpoint, which would KeyError on the duration lookup)
     valid_ids = {a.id for a in activities}
-    bad_edges = [(u, v) for u, v in G.edges() if u not in valid_ids or v not in valid_ids]
-    G.remove_edges_from(bad_edges)
+    G.remove_nodes_from([n for n in list(G.nodes) if n not in valid_ids])
 
     try:
         order = list(nx.topological_sort(G))
@@ -102,7 +102,10 @@ def compute_cpm(activities: List[Activity], project_start: date) -> Dict[str, An
                     candidates.append(lf[s] - lag + dur)
                 else:
                     candidates.append(ls[s] - lag)
-            lf[node] = min(candidates)
+            # Cap at project end: an activity whose only successors are
+            # SS/SF-linked can still drive the finish date itself, and its
+            # late finish must not drift past it.
+            lf[node] = min(min(candidates), project_duration)
         ls[node] = lf[node] - dur
 
     critical_path = [n for n in order if abs(ls[n] - es[n]) < 0.01]
