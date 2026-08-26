@@ -46,4 +46,14 @@ class CacheManager:
         return True
 
 
+def client_ip(request) -> str:
+    """Real client IP for rate limiting. Behind Render's proxy,
+    request.client.host is the proxy — the caller is the first entry
+    in X-Forwarded-For."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
 cache = CacheManager()

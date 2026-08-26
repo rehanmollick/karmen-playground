@@ -8,10 +8,11 @@ from datetime import date
 
 logger = logging.getLogger(__name__)
 
-from app.models.schedule import Project, ProjectSummary, Activity, Dependency, WBSNode
+from app.models.schedule import Project, ProjectSummary
 from app.services.cpm_engine import apply_cpm_to_project
+from app.services.mutations import apply_mutations, parse_activities, parse_wbs
 from app.services.project_store import get_projects, get_project, set_project, load_seed_projects
-from app.cache.cache_manager import cache
+from app.cache.cache_manager import cache, client_ip
 
 router = APIRouter()
 
@@ -74,14 +75,15 @@ async def generate_schedule(request: Request, body: dict = Body(...)):
     if not scope_text:
         raise HTTPException(status_code=400, detail="scope_text is required")
 
-    client_ip = request.client.host if request.client else "unknown"
-    if not cache.check_rate_limit(client_ip):
+    if not cache.check_rate_limit(client_ip(request)):
         raise HTTPException(
             status_code=429,
             detail="Rate limit reached. This is a demo -- for the full experience, reach out to the Karmen team!",
         )
 
-    cache_key = f"gen:{hashlib.md5(scope_text[:200].encode()).hexdigest()}"
+    # Hash the full scope — truncating meant two scopes sharing a 200-char
+    # prefix collided and served each other's cached schedule.
+    cache_key = f"gen:{hashlib.sha256(scope_text.encode()).hexdigest()}"
     cached = cache.get_by_key(cache_key)
     if cached:
         # Still store in session so it shows up in their project list
@@ -100,8 +102,8 @@ async def generate_schedule(request: Request, body: dict = Body(...)):
         description=scope_text[:200],
         project_type=project_type,
         start_date=date.today(),
-        wbs=_parse_wbs(llm_data.get("wbs", [])),
-        activities=_parse_activities(llm_data.get("activities", [])),
+        wbs=parse_wbs(llm_data.get("wbs", [])),
+        activities=parse_activities(llm_data.get("activities", [])),
     )
     project = apply_cpm_to_project(project)
     set_project(project.id, project, sid)
@@ -122,8 +124,7 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
     if not instruction:
         raise HTTPException(status_code=400, detail="instruction is required")
 
-    client_ip = request.client.host if request.client else "unknown"
-    if not cache.check_rate_limit(client_ip):
+    if not cache.check_rate_limit(client_ip(request)):
         raise HTTPException(
             status_code=429,
             detail="Rate limit reached. This is a demo -- for the full experience, reach out to the Karmen team!",
@@ -134,46 +135,7 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
     from app.services.llm_service import edit_schedule_nl
 
     mutations_data = await edit_schedule_nl(project.model_dump(mode="json"), instruction)
-    mutations = mutations_data.get("mutations", [])
-    diff = []
-
-    act_map = {a.id: a for a in project.activities}
-
-    for mut in mutations:
-        mut_type = mut.get("type")
-        if mut_type == "modify_duration":
-            aid = mut.get("activity_id")
-            new_val = mut.get("new_value")
-            if aid in act_map and new_val is not None:
-                old_val = act_map[aid].duration_days
-                act_map[aid].duration_days = int(new_val)
-                diff.append({"type": "modify_duration", "activity_id": aid, "old": old_val, "new": int(new_val)})
-
-        elif mut_type == "add_activity":
-            act_data = mut.get("activity", {})
-            if act_data and act_data.get("id") not in act_map:
-                new_act = _parse_single_activity(act_data)
-                project.activities.append(new_act)
-                act_map[new_act.id] = new_act
-                diff.append({"type": "add_activity", "activity_id": new_act.id})
-
-        elif mut_type == "remove_activity":
-            aid = mut.get("activity_id")
-            if aid in act_map:
-                project.activities = [a for a in project.activities if a.id != aid]
-                del act_map[aid]
-                diff.append({"type": "remove_activity", "activity_id": aid})
-
-        elif mut_type == "add_dependency":
-            to_id = mut.get("to_id")
-            from_id = mut.get("from_id")
-            dep_type = mut.get("dep_type", "FS")
-            lag = mut.get("lag_days", 0)
-            if to_id in act_map and from_id in act_map:
-                act_map[to_id].predecessors.append(
-                    Dependency(predecessor_id=from_id, type=dep_type, lag_days=lag)
-                )
-                diff.append({"type": "add_dependency", "from": from_id, "to": to_id})
+    diff = apply_mutations(project, mutations_data.get("mutations", []))
 
     project = apply_cpm_to_project(project)
     set_project(project.id, project, sid)
@@ -183,45 +145,3 @@ async def edit_schedule(request: Request, body: dict = Body(...)):
         "diff": diff,
         "summary": mutations_data.get("summary", "Schedule updated."),
     }
-
-
-# ── helpers ────────────────────────────────────────────────────────────────
-
-def _parse_wbs(nodes_data: list) -> List[WBSNode]:
-    out = []
-    for nd in nodes_data:
-        out.append(
-            WBSNode(
-                id=str(nd.get("id", "")),
-                name=nd.get("name", ""),
-                parent_id=nd.get("parent_id"),
-                children=_parse_wbs(nd.get("children", [])),
-                activities=nd.get("activities", []),
-            )
-        )
-    return out
-
-
-def _parse_activities(acts_data: list) -> List[Activity]:
-    return [_parse_single_activity(a) for a in acts_data]
-
-
-def _parse_single_activity(a: dict) -> Activity:
-    preds = [
-        Dependency(
-            predecessor_id=str(d.get("predecessor_id", "")),
-            type=d.get("type", "FS"),
-            lag_days=int(d.get("lag_days", 0)),
-        )
-        for d in a.get("predecessors", [])
-    ]
-    return Activity(
-        id=str(a.get("id", "")),
-        name=a.get("name", ""),
-        wbs_id=str(a.get("wbs_id", "")),
-        duration_days=int(a.get("duration_days", 1)),
-        predecessors=preds,
-        resource=a.get("resource"),
-        is_milestone=bool(a.get("is_milestone", False)),
-        notes=a.get("notes"),
-    )

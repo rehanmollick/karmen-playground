@@ -9,11 +9,39 @@ from app.models.change_order import ChangeOrder, ImpactAnalysis, Fragnet, Activi
 from app.models.schedule import Activity, Dependency
 from app.services.fragnet_engine import apply_fragnet, compute_impact
 from app.services.project_store import get_project
-from app.cache.cache_manager import cache
+from app.cache.cache_manager import cache, client_ip
 
 router = APIRouter()
 
 _change_orders: dict = {}
+
+
+def _parse_fragnet(fragnet_data: dict) -> Fragnet:
+    """Build a validated Fragnet from the LLM's raw dict output."""
+    new_acts = []
+    for act_data in fragnet_data.get("new_activities", []):
+        preds = [Dependency(**d) for d in act_data.get("predecessors", [])]
+        new_acts.append(
+            Activity(
+                id=act_data.get("id", ""),
+                name=act_data.get("name", ""),
+                wbs_id=act_data.get("wbs_id", "1.1"),
+                duration_days=act_data.get("duration_days", 5),
+                predecessors=preds,
+                resource=act_data.get("resource"),
+                is_milestone=act_data.get("is_milestone", False),
+            )
+        )
+    return Fragnet(
+        new_activities=new_acts,
+        modified_activities=[ActivityDelta(**d) for d in fragnet_data.get("modified_activities", [])],
+        new_dependencies=[
+            DependencyLink(**d)
+            for d in fragnet_data.get("new_dependencies", [])
+            if "from_id" in d and "to_id" in d
+        ],
+        removed_dependencies=fragnet_data.get("removed_dependencies", []),
+    )
 
 
 def _load_change_orders():
@@ -55,12 +83,13 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
         raise HTTPException(status_code=404, detail=f"Change order '{co_id}' not found")
     co = _change_orders[co_id]
 
-    cache_key = f"co:{project_id}:{co_id}"
+    # Keyed per session: projects are session-mutable (copy-on-write), so a
+    # global key would serve one session's analysis to another — or serve a
+    # stale result to the same session after it edits the project.
+    cache_key = f"co:{sid}:{project_id}:{co_id}"
     cached = cache.get_by_key(cache_key)
     if cached:
         return cached
-
-    client_ip = request.client.host if request.client else "unknown"
 
     if co.fragnet:
         fragnet = co.fragnet
@@ -80,7 +109,7 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
             f"Description: {co.description[:120]}",
         ]
     else:
-        if not cache.check_rate_limit(client_ip):
+        if not cache.check_rate_limit(client_ip(request)):
             raise HTTPException(
                 status_code=429,
                 detail="Rate limit reached. This is a demo — for the full experience, reach out to the Karmen team!",
@@ -91,32 +120,9 @@ async def analyze_change_order(request: Request, body: dict = Body(...)):
         llm_result = await analyze_change_order_llm(
             project.model_dump(mode="json"), co.name, co.description, co.source
         )
-        fragnet_data = llm_result.get("fragnet", {})
+        fragnet = _parse_fragnet(llm_result.get("fragnet", {}))
         narrative = llm_result.get("narrative", "Impact analysis unavailable.")
         citations = llm_result.get("citations", [])
-
-        new_acts = []
-        for act_data in fragnet_data.get("new_activities", []):
-            preds = [Dependency(**d) for d in act_data.get("predecessors", [])]
-            new_acts.append(
-                Activity(
-                    id=act_data.get("id", ""),
-                    name=act_data.get("name", ""),
-                    wbs_id=act_data.get("wbs_id", "1.1"),
-                    duration_days=act_data.get("duration_days", 5),
-                    predecessors=preds,
-                    resource=act_data.get("resource"),
-                    is_milestone=act_data.get("is_milestone", False),
-                )
-            )
-        modified_acts = [ActivityDelta(**d) for d in fragnet_data.get("modified_activities", [])]
-        new_deps = [DependencyLink(**d) for d in fragnet_data.get("new_dependencies", []) if "from_id" in d and "to_id" in d]
-        fragnet = Fragnet(
-            new_activities=new_acts,
-            modified_activities=modified_acts,
-            new_dependencies=new_deps,
-            removed_dependencies=fragnet_data.get("removed_dependencies", []),
-        )
 
     modified_project = apply_fragnet(project, fragnet)
     impact = compute_impact(project, modified_project, narrative, citations, fragnet)
@@ -144,8 +150,7 @@ async def analyze_custom_change_order(request: Request, body: dict = Body(...)):
     if not description:
         raise HTTPException(status_code=400, detail="description is required")
 
-    client_ip = request.client.host if request.client else "unknown"
-    if not cache.check_rate_limit(client_ip):
+    if not cache.check_rate_limit(client_ip(request)):
         raise HTTPException(
             status_code=429,
             detail="Rate limit reached. This is a demo — for the full experience, reach out to the Karmen team!",
@@ -156,32 +161,9 @@ async def analyze_custom_change_order(request: Request, body: dict = Body(...)):
     llm_result = await analyze_change_order_llm(
         project.model_dump(mode="json"), name, description, source, use_flash=True
     )
-    fragnet_data = llm_result.get("fragnet", {})
+    fragnet = _parse_fragnet(llm_result.get("fragnet", {}))
     narrative = llm_result.get("narrative", "Impact analysis unavailable.")
     citations = llm_result.get("citations", [])
-
-    new_acts = []
-    for act_data in fragnet_data.get("new_activities", []):
-        preds = [Dependency(**d) for d in act_data.get("predecessors", [])]
-        new_acts.append(
-            Activity(
-                id=act_data.get("id", ""),
-                name=act_data.get("name", ""),
-                wbs_id=act_data.get("wbs_id", "1.1"),
-                duration_days=act_data.get("duration_days", 5),
-                predecessors=preds,
-                resource=act_data.get("resource"),
-                is_milestone=act_data.get("is_milestone", False),
-            )
-        )
-    modified_acts = [ActivityDelta(**d) for d in fragnet_data.get("modified_activities", [])]
-    new_deps = [DependencyLink(**d) for d in fragnet_data.get("new_dependencies", []) if "from_id" in d and "to_id" in d]
-    fragnet = Fragnet(
-        new_activities=new_acts,
-        modified_activities=modified_acts,
-        new_dependencies=new_deps,
-        removed_dependencies=fragnet_data.get("removed_dependencies", []),
-    )
 
     modified_project = apply_fragnet(project, fragnet)
     impact = compute_impact(project, modified_project, narrative, citations, fragnet)
