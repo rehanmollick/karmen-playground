@@ -60,6 +60,8 @@
 
 ## Running Locally
 
+**Prerequisites:** Python 3.11+ and Node 20+.
+
 ### 1. Clone
 
 ```bash
@@ -106,6 +108,19 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+The backend also has a `Dockerfile` if you'd rather run it in a container:
+`docker build -t karmen-api backend && docker run --env-file backend/.env -p 8000:8000 karmen-api`.
+
+### 4. Tests
+
+The CPM engine and Monte Carlo simulator have a pytest suite (also run in CI):
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest
+```
 
 ---
 
